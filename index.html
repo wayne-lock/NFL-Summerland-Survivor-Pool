@@ -1,0 +1,261 @@
+doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>NFL Summerland Survivor Pool</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#12355b;--blue:#1e5a91;--bg:#f4f6f9;--ink:#172033;--muted:#667085;--line:#d7dee8;--good:#18794e;--warn:#9a6700;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+header{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:20px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0 0 4px;font-size:clamp(24px,4vw,36px)}header p{margin:0;opacity:.9}
+main{max-width:1180px;margin:auto;padding:18px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:18px;box-shadow:0 2px 10px rgba(16,24,40,.05)}
+.auth{max-width:500px;margin:28px auto}.hidden{display:none!important}.tabs{display:flex;gap:8px;margin-bottom:16px}.tab{background:#e8eef5;color:var(--ink)}.tab.active{background:var(--navy);color:#fff}
+label{display:block;font-weight:700;margin:12px 0 6px}input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;font:inherit}
+button{border:0;border-radius:9px;padding:11px 15px;background:var(--navy);color:#fff;font:inherit;font-weight:700;cursor:pointer;margin-top:12px}
+button.secondary{background:#e8eef5;color:var(--ink);margin:0}button:disabled{opacity:.45;cursor:not-allowed}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}.stat strong{display:block;font-size:26px}.stat span{font-size:13px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(330px,1fr) minmax(420px,1.35fr);gap:18px}.small{font-size:12px;color:var(--muted)}.message{padding:9px;border-radius:9px;min-height:10px}.warning{background:#fff8e7;border-color:#e8c76d}
+.game{border:1px solid var(--line);border-radius:13px;padding:12px;margin:12px 0}.game-time{font-size:12px;color:var(--muted);margin-bottom:8px}.matchup{display:grid;grid-template-columns:1fr auto 1fr;gap:9px;align-items:stretch}.team{border:1px solid var(--line);border-radius:10px;padding:10px}.team.home{background:#eef6ff;border-color:#6b9ccc}.team.used{opacity:.45}.team .where{font-size:11px;color:var(--muted);font-weight:700}.team button{width:100%}
+.identity{display:flex;gap:12px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line)}.avatar{width:58px;height:58px;border-radius:50%;background:#e7eef6;display:grid;place-items:center;font-size:30px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}.table-wrap{overflow:auto}
+.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700}.active-b{background:#e7f6ee;color:var(--good)}.danger-b{background:#fff4d6;color:var(--warn)}.out-b{background:#fdecec;color:var(--bad)}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:820px){.layout{grid-template-columns:1fr}.summary{grid-template-columns:1fr 1fr}.matchup{grid-template-columns:1fr}.at{text-align:center}.admin-grid{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>NFL Summerland Survivor Pool</h1>
+    <p>$20 entry â¢ two mulligans â¢ third loss eliminates â¢ each NFL team may be used only once</p>
+  </div>
+  <button id="logoutBtn" class="secondary hidden">Sign Out</button>
+</header>
+
+<main>
+<section id="setupWarning" class="panel warning hidden">
+  <h2>Connection required</h2>
+  <p>Add your Supabase project URL and publishable key to <strong>config.js</strong> before deploying.</p>
+</section>
+
+<section id="authView" class="panel auth">
+  <div class="tabs">
+    <button id="loginTab" class="tab active">Sign In</button>
+    <button id="signupTab" class="tab">Join Pool</button>
+  </div>
+
+  <form id="loginForm">
+    <h2>Participant Sign In</h2>
+    <label>Email</label><input id="loginEmail" type="email" required>
+    <label>Password</label><input id="loginPassword" type="password" minlength="6" required>
+    <button type="submit">Sign In</button>
+  </form>
+
+  <form id="signupForm" class="hidden">
+    <h2>Join the Pool</h2>
+    <label>First name</label><input id="firstName" required maxlength="30">
+    <label>Last name</label><input id="lastName" required maxlength="40">
+    <label>Email</label><input id="signupEmail" type="email" required>
+    <label>Password</label><input id="signupPassword" type="password" minlength="6" required>
+    <label>Pool code</label><input id="poolCode" required placeholder="Provided by the organizer">
+    <button type="submit">Create My Entry</button>
+    <p class="small">Your nickname will clearly use your first name. A last-name identifier is added only when needed.</p>
+  </form>
+  <p id="authMessage" class="message"></p>
+</section>
+
+<section id="appView" class="hidden">
+  <div class="summary">
+    <div class="stat"><strong id="currentWeek">â</strong><span>Current Week</span></div>
+    <div class="stat"><strong id="playerCount">â</strong><span>Players</span></div>
+    <div class="stat"><strong id="activeCount">â</strong><span>Still Active</span></div>
+    <div class="stat"><strong id="prizeTotal">â</strong><span>Prize</span></div>
+  </div>
+
+  <div class="layout">
+    <section class="panel">
+      <div id="identity"></div>
+      <h2>Make Your Pick</h2>
+      <div id="pickStatus" class="message"></div>
+      <div id="games"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Standings</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Player</th><th>Week Pick</th><th>Losses</th><th>Mulligans</th><th>Status</th></tr></thead>
+          <tbody id="standings"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section id="adminPanel" class="panel hidden">
+    <h2>Administrator</h2>
+    <div class="admin-grid">
+      <div>
+        <label>Current week</label>
+        <select id="adminWeek"></select>
+        <button id="saveWeekBtn">Save Current Week</button>
+      </div>
+      <div>
+        <label>Refresh completed games</label>
+        <button id="scoreBtn">Update Results and Mulligans</button>
+        <p class="small">This checks completed NFL scores and applies losses. A tie or no winning result counts as a loss.</p>
+      </div>
+    </div>
+    <p id="adminMessage" class="message"></p>
+  </section>
+</section>
+</main>
+
+<script>
+window.POOL_CONFIG = {
+  SUPABASE_URL: "https://xglmbjaqdidnvcjerhnl.supabase.co",
+  SUPABASE_PUBLISHABLE_KEY: "sb_publishable_rA0betd-krlMP-_ZJknK1g_vN10Eb0c"
+};
+
+</script>
+<script>
+const C = window.POOL_CONFIG || {};
+const configured = C.SUPABASE_URL && !C.SUPABASE_URL.includes("PASTE_") &&
+                   C.SUPABASE_PUBLISHABLE_KEY && !C.SUPABASE_PUBLISHABLE_KEY.includes("PASTE_");
+const sb = configured ? supabase.createClient(C.SUPABASE_URL, C.SUPABASE_PUBLISHABLE_KEY) : null;
+const $ = id => document.getElementById(id);
+let me=null, settings=null, games=[], usedTeams=[];
+
+if(!configured) $("setupWarning").classList.remove("hidden");
+
+$("loginTab").onclick=()=>switchAuth(true);
+$("signupTab").onclick=()=>switchAuth(false);
+function switchAuth(login){
+ $("loginForm").classList.toggle("hidden",!login); $("signupForm").classList.toggle("hidden",login);
+ $("loginTab").classList.toggle("active",login); $("signupTab").classList.toggle("active",!login);
+}
+function msg(id,text,bad=false){const e=$(id);e.textContent=text;e.style.color=bad?"#b42318":"#18794e"}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+$("loginForm").onsubmit=async e=>{
+ e.preventDefault(); if(!sb)return;
+ msg("authMessage","Signing in...");
+ const {error}=await sb.auth.signInWithPassword({email:$("loginEmail").value,password:$("loginPassword").value});
+ if(error)msg("authMessage",error.message,true);
+};
+$("signupForm").onsubmit=async e=>{
+ e.preventDefault(); if(!sb)return;
+ msg("authMessage","Creating entry...");
+ const {data,error}=await sb.auth.signUp({
+   email:$("signupEmail").value,password:$("signupPassword").value,
+   options:{data:{first_name:$("firstName").value.trim(),last_name:$("lastName").value.trim(),pool_code:$("poolCode").value.trim()}}
+ });
+ if(error)return msg("authMessage",error.message,true);
+ msg("authMessage",data.session?"Entry created.":"Check your email to confirm your account.");
+};
+$("logoutBtn").onclick=()=>sb.auth.signOut();
+
+async function boot(){
+ if(!sb)return;
+ sb.auth.onAuthStateChange((_event,session)=> session ? loadApp(session.user) : showAuth());
+ const {data:{session}}=await sb.auth.getSession();
+ session ? await loadApp(session.user) : showAuth();
+}
+function showAuth(){
+ me=null;$("authView").classList.remove("hidden");$("appView").classList.add("hidden");$("logoutBtn").classList.add("hidden");
+}
+async function loadApp(user){
+ $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("logoutBtn").classList.remove("hidden");
+ const {data:profile,error}=await sb.from("profiles").select("*").eq("id",user.id).single();
+ if(error){msg("pickStatus","Your participant profile is not ready. Confirm that the database setup SQL was run.",true);return}
+ me=profile;
+ const {data:s}=await sb.from("pool_settings").select("*").eq("id",1).single();settings=s;
+ renderIdentity();await loadSharedData();await loadSchedule();
+ $("adminPanel").classList.toggle("hidden",!me.is_admin);
+ if(me.is_admin)setupAdmin();
+}
+function renderIdentity(){
+ $("identity").innerHTML=`<div class="identity"><div class="avatar">${esc(me.avatar)}</div><div><h2 style="margin:0">${esc(me.nickname)}</h2><div>${esc(me.first_name)} ${esc(me.last_name)}</div><div class="small">Losses: ${me.losses} â¢ Mulligans remaining: ${Math.max(0,2-me.losses)}</div></div></div>`;
+ $("currentWeek").textContent=settings.current_week;
+}
+async function loadSharedData(){
+ const [{data:profiles},{data:picks}]=await Promise.all([
+   sb.from("profiles").select("id,nickname,avatar,losses,eliminated,paid").order("created_at"),
+   sb.from("picks").select("*").eq("week",settings.current_week)
+ ]);
+ const all=profiles||[], current=picks||[];
+ $("playerCount").textContent=all.length;
+ $("activeCount").textContent=all.filter(p=>!p.eliminated).length;
+ $("prizeTotal").textContent="$"+all.filter(p=>p.paid).length*20;
+ const mineAll=await sb.from("picks").select("team_abbr").eq("user_id",me.id);
+ usedTeams=(mineAll.data||[]).map(x=>x.team_abbr);
+ $("standings").innerHTML=all.map(p=>{
+   const pick=current.find(x=>x.user_id===p.id);
+   const status=p.eliminated?["Eliminated","out-b"]:p.losses===2?["Final Mulligan","danger-b"]:["Active","active-b"];
+   return `<tr><td>${esc(p.avatar)} <b>${esc(p.nickname)}</b></td><td>${pick?esc(pick.team_name):"â"}</td><td>${p.losses}</td><td>${Math.max(0,2-p.losses)}</td><td><span class="badge ${status[1]}">${status[0]}</span></td></tr>`;
+ }).join("");
+}
+async function loadSchedule(){
+ msg("pickStatus","Loading Week "+settings.current_week+" NFL matchups...");
+ try{
+   const url=`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week=${settings.current_week}&dates=${settings.season}`;
+   const r=await fetch(url);const j=await r.json();
+   games=(j.events||[]).map(e=>{
+     const c=e.competitions[0],h=c.competitors.find(x=>x.homeAway==="home"),a=c.competitors.find(x=>x.homeAway==="away");
+     return {id:e.id,date:e.date,completed:e.status.type.completed,
+       home:{abbr:h.team.abbreviation,name:h.team.displayName,winner:!!h.winner},
+       away:{abbr:a.team.abbreviation,name:a.team.displayName,winner:!!a.winner}};
+   });
+   renderGames();msg("pickStatus",games.length?"Select one unused team to win.":"The schedule is not available yet.",!games.length);
+ }catch{msg("pickStatus","The NFL schedule could not be loaded. Try again shortly.",true)}
+}
+function renderGames(){
+ $("games").innerHTML=games.map(g=>`<div class="game"><div class="game-time">${new Date(g.date).toLocaleString()}</div>
+ <div class="matchup">${teamCard(g.away,"AWAY TEAM")}<div class="at"><b>AT</b></div>${teamCard(g.home,"HOME TEAM",true)}</div></div>`).join("");
+}
+function teamCard(t,where,home=false){
+ const used=usedTeams.includes(t.abbr),disabled=used||me.eliminated;
+ return `<div class="team ${home?"home":""} ${used?"used":""}"><b>${esc(t.name)}</b><div class="where">${where}</div>
+ <button ${disabled?"disabled":""} onclick="makePick('${t.abbr}','${esc(t.name).replace(/'/g,"&#39;")}')">${used?"Already Used":"Pick "+esc(t.abbr)}</button></div>`;
+}
+window.makePick=async(abbr,name)=>{
+ if(!confirm(`Select ${name} to win Week ${settings.current_week}?`))return;
+ const game=games.find(g=>g.home.abbr===abbr||g.away.abbr===abbr);
+ const {error}=await sb.from("picks").insert({user_id:me.id,week:settings.current_week,team_abbr:abbr,team_name:name,game_id:game.id,result:"pending"});
+ if(error)return msg("pickStatus",error.message.includes("duplicate")?"You already made a pick this week or already used that team.":error.message,true);
+ msg("pickStatus",`${name} is your Week ${settings.current_week} selection.`);await loadSharedData();renderGames();
+};
+
+function setupAdmin(){
+ $("adminWeek").innerHTML=Array.from({length:18},(_,i)=>`<option value="${i+1}">Week ${i+1}</option>`).join("");
+ $("adminWeek").value=settings.current_week;
+ $("saveWeekBtn").onclick=async()=>{
+   const {error}=await sb.from("pool_settings").update({current_week:Number($("adminWeek").value)}).eq("id",1);
+   msg("adminMessage",error?error.message:"Current week updated.",!!error);
+   if(!error){settings.current_week=Number($("adminWeek").value);await loadApp({id:me.id})}
+ };
+ $("scoreBtn").onclick=finalizeWeek;
+}
+async function finalizeWeek(){
+ msg("adminMessage","Checking completed games...");
+ await loadSchedule();
+ const completed=games.filter(g=>g.completed);
+ const {data:picks,error}=await sb.from("picks").select("*").eq("week",settings.current_week).eq("result","pending");
+ if(error)return msg("adminMessage",error.message,true);
+ for(const p of picks||[]){
+   const g=completed.find(x=>x.id===p.game_id); if(!g)continue;
+   const chosen=g.home.abbr===p.team_abbr?g.home:g.away;
+   await sb.rpc("apply_pick_result",{p_pick_id:p.id,p_result:chosen.winner?"win":"loss"});
+ }
+ msg("adminMessage","Completed results, mulligans and eliminations updated.");await loadApp({id:me.id});
+}
+boot();
+
+</script>
+</body>
+</html>
