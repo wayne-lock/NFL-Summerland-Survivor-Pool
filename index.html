@@ -104,23 +104,53 @@
 
       <div class="admin-grid">
         <div>
-          <h3>Season Settings</h3>
+          <h3>Pool Settings</h3>
           <label>Season year</label>
           <input id="adminSeason" type="number" min="2026" max="2100">
-
           <label>Current NFL week</label>
           <select id="adminWeek"></select>
-
-          <button id="saveSettingsBtn">Save Season and Week</button>
+          <label>Entry fee</label>
+          <input id="adminEntryFee" type="number" min="0" step="1">
+          <label>Maximum survivors</label>
+          <input id="adminMaxSurvivors" type="number" min="2" max="500">
+          <label class="check-row"><input id="adminRegistrationOpen" type="checkbox"> Registration open</label>
+          <button id="saveSettingsBtn">Save Pool Settings</button>
         </div>
 
         <div>
-          <h3>Automatic Results</h3>
+          <h3>Weekly Controls</h3>
           <button id="scoreBtn">Update Completed Results</button>
           <p class="small">Checks completed NFL games, applies wins and losses, uses mulligans, and moves a survivor to the bench after a third loss.</p>
+          <label>Pick lock</label>
+          <div class="readonly-setting">15 minutes before the selected game's kickoff</div>
+          <label>Emergency Auto Pick</label>
+          <div class="readonly-setting">30 minutes before the final game of the week</div>
         </div>
       </div>
 
+      <hr class="section-rule">
+
+      <div class="locker-header">
+        <div>
+          <h3>Locker Room</h3>
+          <p class="small">Manage invitations and entry payments. Weekly picks remain private.</p>
+        </div>
+        <button id="showInviteBtn">Invite Survivor</button>
+      </div>
+
+      <form id="inviteForm" class="invite-form hidden">
+        <div><label>First name</label><input id="inviteFirstName" maxlength="30" required></div>
+        <div><label>Last name</label><input id="inviteLastName" maxlength="40" required></div>
+        <div><label>Email</label><input id="inviteEmail" type="email" required></div>
+        <div class="invite-actions">
+          <button type="submit">Create Invitation</button>
+          <button type="button" id="cancelInviteBtn" class="secondary">Cancel</button>
+        </div>
+      </form>
+
+      <div id="lockerRoom" class="locker-room"></div>
+      <h3>Invitations</h3>
+      <div id="invitationList" class="locker-room"></div>
       <p id="commissionerMessage" class="message"></p>
     </section>
   </section>
