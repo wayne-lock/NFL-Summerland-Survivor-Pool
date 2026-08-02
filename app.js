@@ -207,6 +207,7 @@ async function loadSharedData() {
     $("commissionerWeek").textContent = settings.current_week;
     $("commissionerPlayers").textContent = allProfiles.length;
     $("commissionerPrize").textContent = `$${prize}`;
+    renderCommissionerStatus();
     renderLockerRoom();
     renderInvitations();
   }
@@ -301,7 +302,7 @@ function renderGames() {
 
 function teamCard(team, location, home = false) {
   const used = usedTeams.includes(team.abbr);
-  const disabled = used || me.eliminated;
+  const disabled = used || me.eliminated || settings.picks_open === false;
 
   return `
     <div class="team ${home ? "home" : ""} ${used ? "used" : ""}">
@@ -317,6 +318,9 @@ function teamCard(team, location, home = false) {
 }
 
 window.makePick = async (abbr, name) => {
+  if (settings.picks_open === false) {
+    return msg("pickStatus", "Picks are currently locked by the Commissioner.", true);
+  }
   if (!confirm(`Select ${name} to win Week ${settings.current_week}?`)) return;
 
   const game = games.find(item =>
@@ -373,9 +377,66 @@ function setupCommissioner() {
   };
 
   $("scoreBtn").onclick = finalizeWeek;
+  $("controlResultsBtn").onclick = finalizeWeek;
+  $("openPicksBtn").onclick = () => setPicksOpen(true);
+  $("lockPicksBtn").onclick = () => setPicksOpen(false);
+  $("advanceWeekBtn").onclick = advanceWeek;
+  $("manageSurvivorsBtn").onclick = () => $("lockerRoomSection").scrollIntoView({ behavior:"smooth" });
+  $("poolSettingsBtn").onclick = () => $("poolSettingsSection").scrollIntoView({ behavior:"smooth" });
   $("showInviteBtn").onclick = () => $("inviteForm").classList.remove("hidden");
   $("cancelInviteBtn").onclick = () => { $("inviteForm").reset(); $("inviteForm").classList.add("hidden"); };
   $("inviteForm").onsubmit = createInvitation;
+  renderCommissionerStatus();
+}
+
+function renderCommissionerStatus() {
+  if (!me?.is_admin || !settings) return;
+
+  const picksOpen = settings.picks_open !== false;
+  $("picksStatusBadge").textContent = picksOpen ? "Picks Open" : "Picks Locked";
+  $("picksStatusBadge").className = `badge ${picksOpen ? "active-b" : "out-b"}`;
+  $("openPicksBtn").disabled = picksOpen;
+  $("lockPicksBtn").disabled = !picksOpen;
+  $("lastActionText").textContent = settings.last_action_text || "No commissioner action recorded yet.";
+  $("lastActionTime").textContent = settings.last_action_at
+    ? new Date(settings.last_action_at).toLocaleString()
+    : "";
+}
+
+async function setPicksOpen(open) {
+  const verb = open ? "open" : "lock";
+  if (!confirm(`Are you sure you want to ${verb} Week ${settings.current_week} picks?`)) return;
+
+  const { data, error } = await sb.rpc("commissioner_set_picks_open", {
+    p_open: open
+  });
+
+  if (error) return msg("commissionerMessage", error.message, true);
+
+  settings = { ...settings, ...(data || {}) };
+  renderCommissionerStatus();
+  msg("commissionerMessage", open ? "Weekly picks are open." : "Weekly picks are locked.");
+}
+
+async function advanceWeek() {
+  if (settings.current_week >= 18) {
+    return msg("commissionerMessage", "Week 18 is the final regular-season week.", true);
+  }
+
+  const nextWeek = settings.current_week + 1;
+  if (!confirm(`Advance the pool from Week ${settings.current_week} to Week ${nextWeek}?`)) return;
+
+  const { data, error } = await sb.rpc("commissioner_advance_week");
+  if (error) return msg("commissionerMessage", error.message, true);
+
+  settings = { ...settings, ...(data || {}) };
+  $("adminWeek").value = settings.current_week;
+  $("currentWeek").textContent = settings.current_week;
+  $("commissionerWeek").textContent = settings.current_week;
+  renderCommissionerStatus();
+  msg("commissionerMessage", `The pool is now on Week ${settings.current_week}.`);
+  await loadSchedule();
+  await loadSharedData();
 }
 
 async function createInvitation(event) {
@@ -477,6 +538,10 @@ async function finalizeWeek() {
     });
   }
 
+  await sb.rpc("commissioner_record_action", {
+    p_action: `Week ${settings.current_week} results updated`
+  });
+
   msg(
     "commissionerMessage",
     "Completed results, mulligans, and bench status updated."
@@ -486,3 +551,4 @@ async function finalizeWeek() {
 }
 
 boot();
+
