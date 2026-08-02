@@ -1,1 +1,97 @@
-
+:root{
+  --navy:#12355b;
+  --blue:#1e5a91;
+  --bg:#f4f6f9;
+  --ink:#172033;
+  --muted:#667085;
+  --line:#d7dee8;
+  --good:#18794e;
+  --warn:#9a6700;
+  --bad:#b42318;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+header{
+  background:linear-gradient(135deg,var(--navy),var(--blue));
+  color:#fff;
+  padding:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header h1{margin:0 0 3px;font-size:clamp(24px,4vw,36px)}
+header p{margin:2px 0;opacity:.92}
+.tagline{font-size:clamp(20px,3vw,28px);font-weight:800;margin:4px 0}
+.season{font-weight:700;letter-spacing:.03em}
+main{max-width:1180px;margin:auto;padding:18px}
+footer{max-width:1180px;margin:auto;padding:0 18px 28px;color:var(--muted);font-weight:700;text-align:center}
+.panel{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:18px;
+  box-shadow:0 2px 10px rgba(16,24,40,.05);
+}
+.auth{max-width:500px;margin:28px auto}
+.auth-intro{text-align:center;margin-bottom:14px}
+.auth-intro h2{margin:0}
+.auth-intro p{margin:6px 0;color:var(--muted)}
+.hidden{display:none!important}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{background:#e8eef5;color:var(--ink)}
+.tab.active{background:var(--navy);color:#fff}
+label{display:block;font-weight:700;margin:12px 0 6px}
+input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;font:inherit}
+button{
+  border:0;
+  border-radius:9px;
+  padding:11px 15px;
+  background:var(--navy);
+  color:#fff;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+  margin-top:12px;
+}
+button.secondary{background:#e8eef5;color:var(--ink);margin:0}
+button:disabled{opacity:.45;cursor:not-allowed}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.stat strong{display:block;font-size:26px}
+.stat span{font-size:13px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(330px,1fr) minmax(400px,1.2fr);gap:18px}
+.small{font-size:12px;color:var(--muted)}
+.message{padding:9px;border-radius:9px;min-height:10px}
+.warning{background:#fff8e7;border-color:#e8c76d}
+.game{border:1px solid var(--line);border-radius:13px;padding:12px;margin:12px 0}
+.game-time{font-size:12px;color:var(--muted);margin-bottom:8px}
+.matchup{display:grid;grid-template-columns:1fr auto 1fr;gap:9px;align-items:stretch}
+.team{border:1px solid var(--line);border-radius:10px;padding:10px}
+.team.home{background:#eef6ff;border-color:#6b9ccc}
+.team.used{opacity:.45}
+.team .where{font-size:11px;color:var(--muted);font-weight:700}
+.team button{width:100%}
+.identity{display:flex;gap:12px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.avatar{width:58px;height:58px;border-radius:50%;background:#e7eef6;display:grid;place-items:center;font-size:30px}
+.survivor-list{display:grid;gap:8px}
+.survivor-row{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:10px}
+.survivor-name{display:flex;align-items:center;gap:9px}
+.mini-avatar{width:38px;height:38px;border-radius:50%;background:#e7eef6;display:grid;place-items:center}
+.bench-heading{margin-top:24px}
+.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700}
+.active-b{background:#e7f6ee;color:var(--good)}
+.danger-b{background:#fff4d6;color:var(--warn)}
+.out-b{background:#eef0f3;color:#5f6b7a}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.commissioner-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 20px}
+.commissioner-card{background:#eef4fa;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.commissioner-card span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.commissioner-card strong{font-size:22px}
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr}
+  .summary{grid-template-columns:1fr 1fr}
+  .matchup{grid-template-columns:1fr}
+  .at{text-align:center}
+  .admin-grid{grid-template-columns:1fr}
+  .commissioner-cards{grid-template-columns:1fr 1fr}
