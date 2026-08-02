@@ -15,6 +15,8 @@ let me = null;
 let settings = null;
 let games = [];
 let usedTeams = [];
+let allProfiles = [];
+let allInvites = [];
 
 if (!configured) $("setupWarning").classList.remove("hidden");
 
@@ -169,28 +171,27 @@ function renderIdentity() {
 }
 
 async function loadSharedData() {
-  const [{ data: profiles, error: profilesError }, { data: picks, error: picksError }] =
-    await Promise.all([
-      sb.from("profiles")
-        .select("id,nickname,avatar,losses,eliminated,paid,created_at")
-        .order("created_at"),
-      sb.from("picks")
-        .select("*")
-        .eq("week", settings.current_week)
-    ]);
+  const requests = [
+    sb.from("profiles").select("id,first_name,last_name,nickname,avatar,losses,eliminated,paid,is_admin,created_at").order("created_at"),
+    sb.from("picks").select("*").eq("week", settings.current_week)
+  ];
+  if (me.is_admin) requests.push(sb.from("pool_invites").select("*").order("created_at", { ascending:false }));
 
-  if (profilesError || picksError) {
+  const results = await Promise.all(requests);
+  if (results[0].error || results[1].error) {
     msg("pickStatus", "Pool information could not be loaded.", true);
     return;
   }
 
-  const all = profiles || [];
-  const active = all.filter(player => !player.eliminated);
-  const bench = all.filter(player => player.eliminated);
-  const entryFee = Number(settings.entry_fee || 20);
-  const prize = all.filter(player => player.paid).length * entryFee;
+  allProfiles = results[0].data || [];
+  allInvites = results[2]?.data || [];
 
-  $("playerCount").textContent = all.length;
+  const active = allProfiles.filter(p => !p.eliminated);
+  const bench = allProfiles.filter(p => p.eliminated);
+  const entryFee = Number(settings.entry_fee || 20);
+  const prize = allProfiles.filter(p => p.paid).length * entryFee;
+
+  $("playerCount").textContent = allProfiles.length;
   $("activeCount").textContent = active.length;
   $("benchCount").textContent = bench.length;
   $("prizeTotal").textContent = `$${prize}`;
@@ -198,18 +199,16 @@ async function loadSharedData() {
   renderSurvivorList("activeSurvivors", active, false);
   renderSurvivorList("benchSurvivors", bench, true);
 
-  const { data: myPicks } = await sb
-    .from("picks")
-    .select("team_abbr")
-    .eq("user_id", me.id);
-
+  const { data: myPicks } = await sb.from("picks").select("team_abbr").eq("user_id", me.id);
   usedTeams = (myPicks || []).map(item => item.team_abbr);
 
   if (me.is_admin) {
     $("commissionerSeason").textContent = settings.season;
     $("commissionerWeek").textContent = settings.current_week;
-    $("commissionerPlayers").textContent = all.length;
+    $("commissionerPlayers").textContent = allProfiles.length;
     $("commissionerPrize").textContent = `$${prize}`;
+    renderLockerRoom();
+    renderInvitations();
   }
 }
 
@@ -349,41 +348,104 @@ window.makePick = async (abbr, name) => {
 };
 
 function setupCommissioner() {
-  $("adminWeek").innerHTML = Array.from(
-    { length: 18 },
-    (_, index) => `<option value="${index + 1}">Week ${index + 1}</option>`
-  ).join("");
-
+  $("adminWeek").innerHTML = Array.from({length:18}, (_,i) => `<option value="${i+1}">Week ${i+1}</option>`).join("");
   $("adminWeek").value = settings.current_week;
   $("adminSeason").value = settings.season;
+  $("adminEntryFee").value = Number(settings.entry_fee || 20);
+  $("adminMaxSurvivors").value = Number(settings.max_survivors || 20);
+  $("adminRegistrationOpen").checked = settings.registration_open !== false;
 
   $("saveSettingsBtn").onclick = async () => {
-    const newWeek = Number($("adminWeek").value);
-    const newSeason = Number($("adminSeason").value);
-
-    const { error } = await sb
-      .from("pool_settings")
-      .update({
-        current_week: newWeek,
-        season: newSeason
-      })
-      .eq("id", 1);
-
-    msg(
-      "commissionerMessage",
-      error ? error.message : "Season and current week updated.",
-      Boolean(error)
-    );
-
+    const updates = {
+      current_week:Number($("adminWeek").value),
+      season:Number($("adminSeason").value),
+      entry_fee:Number($("adminEntryFee").value),
+      max_survivors:Number($("adminMaxSurvivors").value),
+      registration_open:$("adminRegistrationOpen").checked
+    };
+    const { error } = await sb.from("pool_settings").update(updates).eq("id",1);
+    msg("commissionerMessage", error ? error.message : "Pool settings updated.", Boolean(error));
     if (!error) {
-      settings.current_week = newWeek;
-      settings.season = newSeason;
-      await loadApp({ id: me.id });
+      settings = {...settings, ...updates};
+      $("seasonDisplay").textContent = settings.season;
+      await loadSharedData();
     }
   };
 
   $("scoreBtn").onclick = finalizeWeek;
+  $("showInviteBtn").onclick = () => $("inviteForm").classList.remove("hidden");
+  $("cancelInviteBtn").onclick = () => { $("inviteForm").reset(); $("inviteForm").classList.add("hidden"); };
+  $("inviteForm").onsubmit = createInvitation;
 }
+
+async function createInvitation(event) {
+  event.preventDefault();
+  const firstName = $("inviteFirstName").value.trim();
+  const lastName = $("inviteLastName").value.trim();
+  const email = $("inviteEmail").value.trim().toLowerCase();
+
+  const { error } = await sb.rpc("commissioner_create_invite", {
+    p_first_name:firstName, p_last_name:lastName, p_email:email
+  });
+  if (error) return msg("commissionerMessage", error.message, true);
+
+  $("inviteForm").reset();
+  $("inviteForm").classList.add("hidden");
+  msg("commissionerMessage", `Invitation prepared for ${firstName}.`);
+  await loadSharedData();
+}
+
+function renderLockerRoom() {
+  $("lockerRoom").innerHTML = allProfiles.length ? allProfiles.map(player => `
+    <div class="locker-card">
+      <div class="survivor-name">
+        <div class="mini-avatar">${esc(player.avatar)}</div>
+        <div><strong>${esc(player.nickname)}</strong><div class="small">${esc(player.first_name)} ${esc(player.last_name)}</div></div>
+      </div>
+      <div>
+        <span class="badge ${player.eliminated ? "out-b":"active-b"}">${player.eliminated ? "On the Bench":"Still in the Game"}</span>
+        <div class="small">${player.paid ? "Entry paid":"Payment outstanding"}</div>
+      </div>
+      <div class="locker-actions">
+        <button onclick="togglePaid('${player.id}', ${!player.paid})">${player.paid ? "Mark Unpaid":"Mark Paid"}</button>
+        <button class="${player.eliminated ? "":"danger-btn"}" onclick="toggleBench('${player.id}', ${!player.eliminated})">${player.eliminated ? "Return to Game":"Move to Bench"}</button>
+      </div>
+    </div>`).join("") : '<p class="small">No survivors have joined yet.</p>';
+}
+
+window.togglePaid = async (profileId, paid) => {
+  const { error } = await sb.rpc("commissioner_update_profile",{p_profile_id:profileId,p_paid:paid,p_eliminated:null});
+  if (error) return msg("commissionerMessage", error.message, true);
+  await loadSharedData();
+};
+
+window.toggleBench = async (profileId, eliminated) => {
+  const { error } = await sb.rpc("commissioner_update_profile",{p_profile_id:profileId,p_paid:null,p_eliminated:eliminated});
+  if (error) return msg("commissionerMessage", error.message, true);
+  await loadSharedData();
+};
+
+function renderInvitations() {
+  $("invitationList").innerHTML = allInvites.length ? allInvites.map(invite => {
+    const subject = encodeURIComponent("NFL Summerland Survivor Pool Invitation");
+    const body = encodeURIComponent(`Hi ${invite.first_name},\n\nYou are invited to join the NFL Summerland Survivor Pool.\n\nOpen ${window.location.origin}/ and choose Join Pool.\nUse pool code: ${settings.pool_code}\n\nOne Winning Pick. Every Week. Last Survivor Standing.`);
+    return `<div class="locker-card">
+      <div><strong>${esc(invite.first_name)} ${esc(invite.last_name)}</strong><div class="email-link">${esc(invite.email)}</div></div>
+      <div><span class="badge ${invite.status==="joined"?"active-b":"danger-b"}">${esc(invite.status)}</span></div>
+      <div class="locker-actions">
+        <button onclick="window.location.href='mailto:${encodeURIComponent(invite.email)}?subject=${subject}&body=${body}'">Open Email</button>
+        <button class="danger-btn" onclick="deleteInvitation('${invite.id}')">Remove</button>
+      </div>
+    </div>`;
+  }).join("") : '<p class="small">No invitations have been prepared.</p>';
+}
+
+window.deleteInvitation = async inviteId => {
+  if (!confirm("Remove this invitation?")) return;
+  const { error } = await sb.rpc("commissioner_delete_invite",{p_invite_id:inviteId});
+  if (error) return msg("commissionerMessage", error.message, true);
+  await loadSharedData();
+};
 
 async function finalizeWeek() {
   msg("commissionerMessage", "Checking completed games...");
@@ -424,4 +486,3 @@ async function finalizeWeek() {
 }
 
 boot();
-
