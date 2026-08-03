@@ -689,3 +689,7 @@ async function finalizeWeek() {
     "commissionerMessage",
     "Completed results, mulligans, and bench status updated."
   );
+  await loadApp({ id: me.id });
+}
+
+boot();
