@@ -121,39 +121,38 @@
             <h3>Commissioner Control Centre</h3>
             <p class="small">Run the weekly pool from one place.</p>
           </div>
-          <span id="picksStatusBadge" class="badge active-b">Automatic Locking</span>
+          <span id="picksStatusBadge" class="system-status"><span class="status-dot"></span>Automatic Locking Active</span>
         </div>
 
         <div class="control-buttons">
-          <button id="openPicksBtn" class="action-card">
-            <span class="action-icon">ð¢</span>
-            <span><strong>Resume Picks</strong><small>End an emergency lock</small></span>
-          </button>
-          <button id="lockPicksBtn" class="action-card">
-            <span class="action-icon">ð</span>
-            <span><strong>Emergency Lock</strong><small>Lock every pick only if needed</small></span>
+          <button id="emergencyToggleBtn" class="action-card action-card-alert">
+            <span class="action-icon icon-lock" aria-hidden="true"></span>
+            <span>
+              <strong id="emergencyToggleTitle">Emergency Lock</strong>
+              <small id="emergencyToggleDescription">Lock every pick only if needed</small>
+            </span>
           </button>
           <button id="controlResultsBtn" class="action-card">
-            <span class="action-icon">ð</span>
+            <span class="action-icon icon-football" aria-hidden="true"></span>
             <span><strong>Update NFL Results</strong><small>Process completed games</small></span>
           </button>
           <button id="advanceWeekBtn" class="action-card">
-            <span class="action-icon">â¡ï¸</span>
+            <span class="action-icon icon-advance" aria-hidden="true"></span>
             <span><strong>Advance Week</strong><small>Move to the next NFL week</small></span>
           </button>
           <button id="manageSurvivorsBtn" class="action-card">
-            <span class="action-icon">ð¥</span>
+            <span class="action-icon icon-people" aria-hidden="true"></span>
             <span><strong>Manage Survivors</strong><small>Open the Locker Room</small></span>
           </button>
           <button id="poolSettingsBtn" class="action-card">
-            <span class="action-icon">âï¸</span>
+            <span class="action-icon icon-settings" aria-hidden="true"></span>
             <span><strong>Pool Settings</strong><small>Season, week and fees</small></span>
           </button>
         </div>
 
         <div class="last-action-panel">
           <span>Last Action</span>
-          <strong id="lastActionText">No commissioner action recorded yet.</strong>
+          <strong id="lastActionText">No actions recorded this week.</strong>
           <small id="lastActionTime"></small>
         </div>
       </section>
