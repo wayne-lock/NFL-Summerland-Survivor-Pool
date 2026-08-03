@@ -17,6 +17,8 @@ let games = [];
 let usedTeams = [];
 let allProfiles = [];
 let allInvites = [];
+let currentPick = null;
+let pickCountdownTimer = null;
 
 if (!configured) $("setupWarning").classList.remove("hidden");
 
@@ -199,8 +201,20 @@ async function loadSharedData() {
   renderSurvivorList("activeSurvivors", active, false);
   renderSurvivorList("benchSurvivors", bench, true);
 
-  const { data: myPicks } = await sb.from("picks").select("team_abbr").eq("user_id", me.id);
+  const { data: myPicks, error: myPicksError } = await sb
+    .from("picks")
+    .select("id,week,team_abbr,team_name,game_id,game_kickoff,result,created_at,updated_at")
+    .eq("user_id", me.id)
+    .order("week");
+
+  if (myPicksError) {
+    msg("pickStatus", "Your pick history could not be loaded.", true);
+    return;
+  }
+
   usedTeams = (myPicks || []).map(item => item.team_abbr);
+  currentPick = (myPicks || []).find(item => item.week === settings.current_week) || null;
+  renderCurrentPickCard();
 
   if (me.is_admin) {
     $("commissionerSeason").textContent = settings.season;
@@ -238,6 +252,87 @@ function renderSurvivorList(elementId, players, onBench) {
       </div>
     `;
   }).join("");
+}
+
+function getPickLockTime(kickoffValue) {
+  if (!kickoffValue) return null;
+  return new Date(new Date(kickoffValue).getTime() - 15 * 60 * 1000);
+}
+
+function isCurrentPickLocked() {
+  if (!currentPick?.game_kickoff) return false;
+  const lockTime = getPickLockTime(currentPick.game_kickoff);
+  return new Date() >= lockTime;
+}
+
+function formatRemaining(milliseconds) {
+  if (milliseconds <= 0) return "Locked";
+  const totalMinutes = Math.floor(milliseconds / 60000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+
+  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${Math.max(1, minutes)}m`;
+}
+
+function renderCurrentPickCard() {
+  if (!$("currentPickCard")) return;
+
+  $("pickCardWeek").textContent = settings.current_week;
+
+  if (pickCountdownTimer) {
+    clearInterval(pickCountdownTimer);
+    pickCountdownTimer = null;
+  }
+
+  if (!currentPick) {
+    $("currentPickCard").classList.remove("locked");
+    $("pickCardBadge").textContent = "Not Selected";
+    $("pickCardBadge").className = "badge danger-b";
+    $("pickCardTeam").textContent = "No pick submitted yet";
+    $("pickCardDetails").textContent = "Choose one unused team below.";
+    $("pickCardCountdown").textContent = "";
+    return;
+  }
+
+  const locked = isCurrentPickLocked() || settings.picks_open === false;
+  const lockTime = getPickLockTime(currentPick.game_kickoff);
+  const lastChanged = currentPick.updated_at || currentPick.created_at;
+
+  $("currentPickCard").classList.toggle("locked", locked);
+  $("pickCardBadge").textContent = locked ? "Locked" : "Confirmed";
+  $("pickCardBadge").className = `badge ${locked ? "out-b" : "active-b"}`;
+  $("pickCardTeam").textContent = currentPick.team_name;
+  $("pickCardDetails").textContent = locked
+    ? `Locked for Week ${settings.current_week}. Good luck!`
+    : `Last changed ${new Date(lastChanged).toLocaleString()}. You may change it before the automatic lock.`;
+
+  const updateCountdown = () => {
+    if (!lockTime) {
+      $("pickCardCountdown").textContent = "";
+      return;
+    }
+
+    const remaining = lockTime.getTime() - Date.now();
+    if (remaining <= 0 || settings.picks_open === false) {
+      $("pickCardCountdown").textContent =
+        `Locked at ${lockTime.toLocaleString()} â 15 minutes before kickoff`;
+      $("currentPickCard").classList.add("locked");
+      $("pickCardBadge").textContent = "Locked";
+      $("pickCardBadge").className = "badge out-b";
+      renderGames();
+      if (pickCountdownTimer) clearInterval(pickCountdownTimer);
+      pickCountdownTimer = null;
+    } else {
+      $("pickCardCountdown").textContent =
+        `Automatically locks in ${formatRemaining(remaining)} (${lockTime.toLocaleString()})`;
+    }
+  };
+
+  updateCountdown();
+  if (!locked) pickCountdownTimer = setInterval(updateCountdown, 30000);
 }
 
 async function loadSchedule() {
@@ -292,64 +387,98 @@ function renderGames() {
     <div class="game">
       <div class="game-time">${new Date(game.date).toLocaleString()}</div>
       <div class="matchup">
-        ${teamCard(game.away, "AWAY TEAM")}
+        ${teamCard(game.away, "AWAY TEAM", false, game)}
         <div class="at"><b>AT</b></div>
-        ${teamCard(game.home, "HOME TEAM", true)}
+        ${teamCard(game.home, "HOME TEAM", true, game)}
       </div>
     </div>
   `).join("");
 }
 
-function teamCard(team, location, home = false) {
-  const used = usedTeams.includes(team.abbr);
-  const disabled = used || me.eliminated || settings.picks_open === false;
+function teamCard(team, location, home = false, game) {
+  const selected = currentPick?.team_abbr === team.abbr;
+  const usedInPriorWeek = usedTeams.includes(team.abbr) && !selected;
+  const gameLockTime = getPickLockTime(game.date);
+  const gameLocked = Date.now() >= gameLockTime.getTime();
+  const currentSelectionLocked = isCurrentPickLocked();
+  const emergencyLocked = settings.picks_open === false;
+  const disabled =
+    usedInPriorWeek ||
+    me.eliminated ||
+    gameLocked ||
+    currentSelectionLocked ||
+    emergencyLocked;
+
+  let buttonText = `Pick ${esc(team.abbr)}`;
+  if (selected) buttonText = currentSelectionLocked || emergencyLocked ? "Your Locked Pick" : "Your Current Pick";
+  else if (usedInPriorWeek) buttonText = "Already Used";
+  else if (gameLocked) buttonText = "Game Locked";
+  else if (currentSelectionLocked || emergencyLocked) buttonText = "Changes Locked";
 
   return `
-    <div class="team ${home ? "home" : ""} ${used ? "used" : ""}">
+    <div class="team ${home ? "home" : ""} ${usedInPriorWeek ? "used" : ""} ${selected ? "selected" : ""}">
       <b>${esc(team.name)}</b>
       <div class="where">${location}</div>
       <button
-        ${disabled ? "disabled" : ""}
-        onclick="makePick('${team.abbr}','${esc(team.name).replace(/'/g, "&#39;")}')">
-        ${used ? "Already Used" : `Pick ${esc(team.abbr)}`}
+        ${disabled || selected ? "disabled" : ""}
+        onclick="makePick('${team.abbr}','${esc(team.name).replace(/'/g, "&#39;")}','${game.id}','${game.date}')">
+        ${buttonText}
       </button>
+      <div class="lock-note">Locks ${gameLockTime.toLocaleString()}</div>
     </div>
   `;
 }
 
-window.makePick = async (abbr, name) => {
+window.makePick = async (abbr, name, gameId, gameKickoff) => {
   if (settings.picks_open === false) {
-    return msg("pickStatus", "Picks are currently locked by the Commissioner.", true);
+    return msg("pickStatus", "All picks are under an emergency lock.", true);
   }
-  if (!confirm(`Select ${name} to win Week ${settings.current_week}?`)) return;
 
-  const game = games.find(item =>
-    item.home.abbr === abbr || item.away.abbr === abbr
-  );
+  if (isCurrentPickLocked()) {
+    return msg("pickStatus", "Your current selection is already locked.", true);
+  }
 
-  const { error } = await sb.from("picks").insert({
-    user_id: me.id,
-    week: settings.current_week,
-    team_abbr: abbr,
-    team_name: name,
-    game_id: game.id,
-    result: "pending"
+  const newLockTime = getPickLockTime(gameKickoff);
+  if (Date.now() >= newLockTime.getTime()) {
+    return msg("pickStatus", "That game is already inside its 15-minute lock period.", true);
+  }
+
+  let confirmation;
+  if (currentPick) {
+    confirmation =
+      `Change your Week ${settings.current_week} pick?\n\n` +
+      `Current: ${currentPick.team_name}\n` +
+      `New: ${name}`;
+  } else {
+    confirmation = `Select ${name} to win Week ${settings.current_week}?`;
+  }
+
+  if (!confirm(confirmation)) return;
+
+  msg("pickStatus", currentPick ? "Changing your pick..." : "Saving your pick...");
+
+  const { data, error } = await sb.rpc("save_or_change_pick", {
+    p_week: settings.current_week,
+    p_team_abbr: abbr,
+    p_team_name: name,
+    p_game_id: gameId,
+    p_game_kickoff: gameKickoff
   });
 
   if (error) {
-    return msg(
-      "pickStatus",
-      error.message.includes("duplicate")
-        ? "You already made a pick this week or already used that team."
-        : error.message,
-      true
-    );
+    return msg("pickStatus", error.message, true);
   }
 
-  msg("pickStatus", `${name} is your Week ${settings.current_week} selection.`);
+  currentPick = data;
+  msg(
+    "pickStatus",
+    `${name} is now your confirmed Week ${settings.current_week} selection.`
+  );
+
   await loadSharedData();
   renderGames();
 };
+
 
 function setupCommissioner() {
   $("adminWeek").innerHTML = Array.from({length:18}, (_,i) => `<option value="${i+1}">Week ${i+1}</option>`).join("");
@@ -393,7 +522,7 @@ function renderCommissionerStatus() {
   if (!me?.is_admin || !settings) return;
 
   const picksOpen = settings.picks_open !== false;
-  $("picksStatusBadge").textContent = picksOpen ? "Picks Open" : "Picks Locked";
+  $("picksStatusBadge").textContent = picksOpen ? "Automatic Locking" : "Emergency Lock Active";
   $("picksStatusBadge").className = `badge ${picksOpen ? "active-b" : "out-b"}`;
   $("openPicksBtn").disabled = picksOpen;
   $("lockPicksBtn").disabled = !picksOpen;
@@ -404,8 +533,10 @@ function renderCommissionerStatus() {
 }
 
 async function setPicksOpen(open) {
-  const verb = open ? "open" : "lock";
-  if (!confirm(`Are you sure you want to ${verb} Week ${settings.current_week} picks?`)) return;
+  const question = open
+    ? "Resume normal automatic pick locking?"
+    : "Emergency-lock every survivor's picks immediately?";
+  if (!confirm(question)) return;
 
   const { data, error } = await sb.rpc("commissioner_set_picks_open", {
     p_open: open
@@ -415,7 +546,9 @@ async function setPicksOpen(open) {
 
   settings = { ...settings, ...(data || {}) };
   renderCommissionerStatus();
-  msg("commissionerMessage", open ? "Weekly picks are open." : "Weekly picks are locked.");
+  renderCurrentPickCard();
+  renderGames();
+  msg("commissionerMessage", open ? "Normal automatic locking resumed." : "Emergency lock activated.");
 }
 
 async function advanceWeek() {
@@ -551,4 +684,3 @@ async function finalizeWeek() {
 }
 
 boot();
-
