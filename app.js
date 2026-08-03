@@ -507,8 +507,7 @@ function setupCommissioner() {
 
   $("scoreBtn").onclick = finalizeWeek;
   $("controlResultsBtn").onclick = finalizeWeek;
-  $("openPicksBtn").onclick = () => setPicksOpen(true);
-  $("lockPicksBtn").onclick = () => setPicksOpen(false);
+  $("emergencyToggleBtn").onclick = () => setPicksOpen(settings.picks_open === false);
   $("advanceWeekBtn").onclick = advanceWeek;
   $("manageSurvivorsBtn").onclick = () => $("lockerRoomSection").scrollIntoView({ behavior:"smooth" });
   $("poolSettingsBtn").onclick = () => $("poolSettingsSection").scrollIntoView({ behavior:"smooth" });
@@ -522,11 +521,22 @@ function renderCommissionerStatus() {
   if (!me?.is_admin || !settings) return;
 
   const picksOpen = settings.picks_open !== false;
-  $("picksStatusBadge").textContent = picksOpen ? "Automatic Locking" : "Emergency Lock Active";
-  $("picksStatusBadge").className = `badge ${picksOpen ? "active-b" : "out-b"}`;
-  $("openPicksBtn").disabled = picksOpen;
-  $("lockPicksBtn").disabled = !picksOpen;
-  $("lastActionText").textContent = settings.last_action_text || "No commissioner action recorded yet.";
+
+  $("picksStatusBadge").innerHTML = picksOpen
+    ? '<span class="status-dot"></span>Automatic Locking Active'
+    : '<span class="status-dot"></span>Emergency Lock Active';
+  $("picksStatusBadge").className = `system-status ${picksOpen ? "" : "emergency"}`;
+
+  $("emergencyToggleTitle").textContent = picksOpen
+    ? "Emergency Lock"
+    : "Resume Automatic Locking";
+  $("emergencyToggleDescription").textContent = picksOpen
+    ? "Lock every pick only if needed"
+    : "End the emergency lock";
+  $("emergencyToggleBtn").classList.toggle("action-card-alert", picksOpen);
+
+  $("lastActionText").textContent =
+    settings.last_action_text || "No actions recorded this week.";
   $("lastActionTime").textContent = settings.last_action_at
     ? new Date(settings.last_action_at).toLocaleString()
     : "";
@@ -679,8 +689,3 @@ async function finalizeWeek() {
     "commissionerMessage",
     "Completed results, mulligans, and bench status updated."
   );
-
-  await loadApp({ id: me.id });
-}
-
-boot();
