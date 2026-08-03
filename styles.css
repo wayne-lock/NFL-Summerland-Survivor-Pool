@@ -176,3 +176,148 @@ button:disabled{opacity:.45;cursor:not-allowed}
   font-size:11px;
   color:var(--muted);
 }
+
+/* Sprint 3C polish */
+.control-centre{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:0 16px 18px;
+  background:#fff;
+}
+.control-heading{
+  margin:0 -16px 16px;
+  padding:15px 16px;
+  border-radius:16px 16px 0 0;
+  background:linear-gradient(135deg,var(--navy),var(--blue));
+  color:#fff;
+}
+.control-heading .small{color:rgba(255,255,255,.82)}
+.system-status{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  border-radius:999px;
+  padding:6px 10px;
+  background:#e7f6ee;
+  color:var(--good);
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.status-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:currentColor;
+  box-shadow:0 0 0 3px rgba(24,121,78,.12);
+}
+.system-status.emergency{
+  background:#fdecec;
+  color:var(--bad);
+}
+.control-buttons{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.action-card{
+  min-height:112px;
+  height:100%;
+  align-items:center;
+  border-width:1px;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.action-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(16,24,40,.08);
+}
+.action-card-alert{
+  border-color:#e0a1a1;
+  background:#fff8f8;
+}
+.action-card-alert:hover{background:#fff2f2}
+.action-card strong{font-size:18px;line-height:1.15}
+.action-card small{margin-top:6px;line-height:1.3}
+.action-icon{
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:#e8eef5;
+  color:var(--navy);
+  position:relative;
+}
+.icon-lock::before{
+  content:"";
+  width:17px;
+  height:14px;
+  border:3px solid currentColor;
+  border-radius:3px;
+  position:absolute;
+  bottom:8px;
+}
+.icon-lock::after{
+  content:"";
+  width:14px;
+  height:13px;
+  border:3px solid currentColor;
+  border-bottom:0;
+  border-radius:10px 10px 0 0;
+  position:absolute;
+  top:6px;
+}
+.icon-football::before{
+  content:"";
+  width:28px;
+  height:18px;
+  border:3px solid currentColor;
+  border-radius:50%;
+  transform:rotate(-25deg);
+}
+.icon-football::after{
+  content:"";
+  width:12px;
+  height:2px;
+  background:currentColor;
+  box-shadow:0 -4px 0 -1px currentColor,0 4px 0 -1px currentColor;
+  transform:rotate(-25deg);
+  position:absolute;
+}
+.icon-advance::before{
+  content:"";
+  border-top:10px solid transparent;
+  border-bottom:10px solid transparent;
+  border-left:15px solid currentColor;
+  margin-left:-8px;
+  box-shadow:11px 0 0 -1px currentColor;
+}
+.icon-people::before{
+  content:"";
+  width:13px;height:13px;border-radius:50%;
+  background:currentColor;
+  box-shadow:18px 0 0 -2px currentColor;
+  transform:translateX(-6px);
+}
+.icon-people::after{
+  content:"";
+  width:23px;height:12px;border-radius:12px 12px 4px 4px;
+  background:currentColor;
+  position:absolute;bottom:7px;left:7px;
+  box-shadow:15px 0 0 -3px currentColor;
+}
+.icon-settings::before{
+  content:"â";
+  font-size:30px;
+  line-height:1;
+}
+.last-action-panel{
+  margin-top:22px;
+  padding:16px;
+}
+.last-action-panel span{margin-bottom:2px}
+.last-action-panel strong{line-height:1.35}
+@media(max-width:520px){
+  .control-buttons{grid-template-columns:1fr}
+  .action-card{min-height:96px}
+}
