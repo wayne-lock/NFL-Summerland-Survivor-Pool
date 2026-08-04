@@ -20,6 +20,8 @@ let allInvites = [];
 let currentWeekPicks = [];
 let currentPick = null;
 let pickCountdownTimer = null;
+let playerNameCheckTimer = null;
+let playerNameAvailable = false;
 
 if (!configured) $("setupWarning").classList.remove("hidden");
 
@@ -81,6 +83,53 @@ function esc(value) {
   })[char]);
 }
 
+function normalizePlayerName(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function validPlayerName(value) {
+  const name = normalizePlayerName(value);
+  return name.length >= 2 && name.length <= 20 && /^[A-Za-z0-9][A-Za-z0-9 .&'\-]*$/.test(name);
+}
+
+async function checkPlayerNameAvailability() {
+  const input = $("playerName");
+  const status = $("playerNameStatus");
+  if (!input || !status || !sb) return false;
+
+  const name = normalizePlayerName(input.value);
+  playerNameAvailable = false;
+
+  if (!validPlayerName(name)) {
+    status.textContent = name.length < 2
+      ? "Use 2â20 characters."
+      : "Use letters, numbers, spaces, periods, apostrophes, hyphens or &.";
+    status.className = "player-name-status unavailable";
+    return false;
+  }
+
+  status.textContent = "Checking availabilityâ¦";
+  status.className = "player-name-status checking";
+
+  const { data, error } = await sb.rpc("is_player_name_available", { p_name: name });
+  if (error) {
+    status.textContent = "Unable to check right now.";
+    status.className = "player-name-status unavailable";
+    return false;
+  }
+
+  playerNameAvailable = Boolean(data);
+  status.textContent = playerNameAvailable ? "â Available" : "â Already taken";
+  status.className = `player-name-status ${playerNameAvailable ? "available" : "unavailable"}`;
+  return playerNameAvailable;
+}
+
+$("playerName")?.addEventListener("input", () => {
+  playerNameAvailable = false;
+  clearTimeout(playerNameCheckTimer);
+  playerNameCheckTimer = setTimeout(checkPlayerNameAvailability, 350);
+});
+
 $("loginForm").onsubmit = async event => {
   event.preventDefault();
   if (!sb) return;
@@ -104,7 +153,13 @@ $("signupForm").onsubmit = async event => {
   const password = $("signupPassword").value;
   const firstName = $("firstName").value.trim();
   const lastName = $("lastName").value.trim();
+  const playerName = normalizePlayerName($("playerName").value);
   const poolCode = $("poolCode").value.trim();
+
+  if (!validPlayerName(playerName) || !(await checkPlayerNameAvailability())) {
+    msg("authMessage", "Please choose an available Player Name.", true);
+    return;
+  }
 
   submitButton.disabled = true;
   submitButton.textContent = "Creating Your Entry...";
@@ -119,6 +174,7 @@ $("signupForm").onsubmit = async event => {
         data: {
           first_name: firstName,
           last_name: lastName,
+          player_name: playerName,
           pool_code: poolCode
         }
       }
@@ -146,6 +202,9 @@ $("signupForm").onsubmit = async event => {
     );
 
     $("signupForm").reset();
+    playerNameAvailable = false;
+    $("playerNameStatus").textContent = "Choose the name other players will see.";
+    $("playerNameStatus").className = "player-name-status";
   } catch (error) {
     msg("authMessage", error, true);
   } finally {
@@ -236,22 +295,55 @@ async function loadApp(user) {
 
 function renderIdentity() {
   const status = me.eliminated ? "On the Bench" : "Still in the Game";
+  const canEditPlayerName = Number(settings.current_week) === 1 && settings.picks_open !== false;
 
   $("identity").innerHTML = `
     <div class="identity">
       <div class="avatar">${esc(me.avatar)}</div>
-      <div>
-        <h2 style="margin:0">${esc(me.nickname)}</h2>
-        <div>${esc(me.first_name)} ${esc(me.last_name)}</div>
-        <div class="small">
-          ${status} &bull; Losses: ${me.losses} &bull;
-          Mulligans remaining: ${Math.max(0, 2 - me.losses)}
-        </div>
+      <div class="identity-copy">
+        <div class="identity-label">PLAYER NAME</div>
+        <h2>${esc(me.nickname)}</h2>
+        <div class="identity-status">${esc(status)}</div>
+        <div class="small">Losses: ${Number(me.losses || 0)} &bull; Mulligans remaining: ${Math.max(0, 2 - Number(me.losses || 0))}</div>
+        ${canEditPlayerName ? `<button id="editPlayerNameBtn" class="secondary compact-btn">Change Player Name</button>` : `<div class="small locked-name">Player Name locked for this season.</div>`}
       </div>
     </div>
-  `;
+    <div id="playerNameEditor" class="player-name-editor hidden">
+      <label>New Player Name</label>
+      <input id="editPlayerName" maxlength="20" value="${esc(me.nickname)}">
+      <div id="editPlayerNameStatus" class="player-name-status">Use 2â20 characters.</div>
+      <div class="inline-actions">
+        <button id="savePlayerNameBtn">Save Player Name</button>
+        <button id="cancelPlayerNameBtn" class="secondary">Cancel</button>
+      </div>
+    </div>`;
 
-  $("currentWeek").textContent = settings.current_week;
+  if (!canEditPlayerName) return;
+
+  $("editPlayerNameBtn").onclick = () => $("playerNameEditor").classList.remove("hidden");
+  $("cancelPlayerNameBtn").onclick = () => $("playerNameEditor").classList.add("hidden");
+  $("savePlayerNameBtn").onclick = async () => {
+    const name = normalizePlayerName($("editPlayerName").value);
+    const statusEl = $("editPlayerNameStatus");
+    if (!validPlayerName(name)) {
+      statusEl.textContent = "Use 2â20 valid characters.";
+      statusEl.className = "player-name-status unavailable";
+      return;
+    }
+
+    statusEl.textContent = "Savingâ¦";
+    statusEl.className = "player-name-status checking";
+    const { data, error } = await sb.rpc("change_my_player_name", { p_name: name });
+    if (error) {
+      statusEl.textContent = readableError(error);
+      statusEl.className = "player-name-status unavailable";
+      return;
+    }
+
+    me.nickname = data;
+    await loadSharedData();
+    renderIdentity();
+  };
 }
 
 async function loadSharedData() {
