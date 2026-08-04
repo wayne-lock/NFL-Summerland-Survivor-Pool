@@ -17,6 +17,7 @@ let games = [];
 let usedTeams = [];
 let allProfiles = [];
 let allInvites = [];
+let currentWeekPicks = [];
 let currentPick = null;
 let pickCountdownTimer = null;
 
@@ -33,9 +34,40 @@ function switchAuth(login) {
   $("signupTab").classList.toggle("active", !login);
 }
 
+function readableError(error) {
+  const raw =
+    error?.message ||
+    error?.error_description ||
+    error?.details ||
+    (typeof error === "string" ? error : "");
+
+  const text = String(raw || "Something went wrong. Please try again.");
+
+  if (/incorrect pool code/i.test(text)) {
+    return "This invitation or pool code is not valid. Please ask the Commissioner to resend the invitation.";
+  }
+  if (/already registered|user already exists/i.test(text)) {
+    return "This email address already has an account. Please use Sign In instead.";
+  }
+  if (/pool is full/i.test(text)) {
+    return "The pool has reached its participant limit. Please contact the Commissioner.";
+  }
+  if (/registration is closed/i.test(text)) {
+    return "Registration is currently closed. Please contact the Commissioner.";
+  }
+  if (/password/i.test(text) && /characters/i.test(text)) {
+    return "Please use a password with at least 6 characters.";
+  }
+  if (/email/i.test(text) && /invalid/i.test(text)) {
+    return "Please enter a valid email address.";
+  }
+  return text;
+}
+
 function msg(id, text, bad = false) {
   const el = $(id);
-  el.textContent = text;
+  if (!el) return;
+  el.textContent = bad ? readableError(text) : String(text ?? "");
   el.style.color = bad ? "#b42318" : "#18794e";
 }
 
@@ -60,37 +92,87 @@ $("loginForm").onsubmit = async event => {
     password: $("loginPassword").value
   });
 
-  if (error) msg("authMessage", error.message, true);
+  if (error) msg("authMessage", error, true);
 };
 
 $("signupForm").onsubmit = async event => {
   event.preventDefault();
   if (!sb) return;
 
-  msg("authMessage", "Creating entry...");
+  const submitButton = $("signupForm").querySelector('button[type="submit"]');
+  const email = $("signupEmail").value.trim().toLowerCase();
+  const password = $("signupPassword").value;
+  const firstName = $("firstName").value.trim();
+  const lastName = $("lastName").value.trim();
+  const poolCode = $("poolCode").value.trim();
 
-  const { data, error } = await sb.auth.signUp({
-    email: $("signupEmail").value,
-    password: $("signupPassword").value,
-    options: {
-      data: {
-        first_name: $("firstName").value.trim(),
-        last_name: $("lastName").value.trim(),
-        pool_code: $("poolCode").value.trim()
+  submitButton.disabled = true;
+  submitButton.textContent = "Creating Your Entry...";
+  msg("authMessage", "Creating your account and preparing the confirmation email...");
+
+  try {
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          pool_code: poolCode
+        }
       }
+    });
+
+    if (error) {
+      msg("authMessage", error, true);
+      return;
     }
-  });
 
-  if (error) return msg("authMessage", error.message, true);
+    if (data?.user?.identities?.length === 0) {
+      msg(
+        "authMessage",
+        "This email address already has an account. Please use Sign In instead.",
+        true
+      );
+      return;
+    }
 
-  msg(
-    "authMessage",
-    data.session ? "Entry created." : "Check your email to confirm your account."
-  );
+    msg(
+      "authMessage",
+      data.session
+        ? "Your entry is ready. You may now continue."
+        : "Success! Check your email for the confirmation link, then return here and sign in."
+    );
+
+    $("signupForm").reset();
+  } catch (error) {
+    msg("authMessage", error, true);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Create My Entry";
+  }
 };
+
+function applyInvitationLink() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("join") !== "1") return;
+
+  switchAuth(false);
+
+  if (params.get("first")) $("firstName").value = params.get("first");
+  if (params.get("last")) $("lastName").value = params.get("last");
+  if (params.get("email")) $("signupEmail").value = params.get("email");
+  if (params.get("code")) $("poolCode").value = params.get("code");
+
+  $("poolCode").readOnly = Boolean(params.get("code"));
+  msg("authMessage", "Invitation loaded. Create a password, then select Create My Entry.");
+}
 
 async function boot() {
   if (!sb) return;
+
+  applyInvitationLink();
 
   sb.auth.onAuthStateChange((_event, session) => {
     session ? loadApp(session.user) : showAuth();
@@ -174,8 +256,12 @@ function renderIdentity() {
 
 async function loadSharedData() {
   const requests = [
-    sb.from("profiles").select("id,first_name,last_name,nickname,avatar,losses,eliminated,paid,is_admin,created_at").order("created_at"),
-    sb.from("picks").select("*").eq("week", settings.current_week)
+    sb.from("profiles")
+      .select("id,first_name,last_name,nickname,avatar,losses,eliminated,paid,is_admin,created_at")
+      .order("created_at"),
+    sb.from("picks")
+      .select("id,user_id,week,team_abbr,team_name,game_id,game_kickoff,result,created_at,updated_at")
+      .eq("week", settings.current_week)
   ];
   if (me.is_admin) requests.push(sb.from("pool_invites").select("*").order("created_at", { ascending:false }));
 
@@ -186,6 +272,7 @@ async function loadSharedData() {
   }
 
   allProfiles = results[0].data || [];
+  currentWeekPicks = results[1].data || [];
   allInvites = results[2]?.data || [];
 
   const active = allProfiles.filter(p => !p.eliminated);
@@ -222,6 +309,7 @@ async function loadSharedData() {
     $("commissionerPlayers").textContent = allProfiles.length;
     $("commissionerPrize").textContent = `$${prize}`;
     renderCommissionerStatus();
+    renderCommissionerPlayerBoard();
     renderLockerRoom();
     renderInvitations();
   }
@@ -466,7 +554,7 @@ window.makePick = async (abbr, name, gameId, gameKickoff) => {
   });
 
   if (error) {
-    return msg("pickStatus", error.message, true);
+    return msg("pickStatus", error, true);
   }
 
   currentPick = data;
@@ -552,7 +640,7 @@ async function setPicksOpen(open) {
     p_open: open
   });
 
-  if (error) return msg("commissionerMessage", error.message, true);
+  if (error) return msg("commissionerMessage", error, true);
 
   settings = { ...settings, ...(data || {}) };
   renderCommissionerStatus();
@@ -570,7 +658,7 @@ async function advanceWeek() {
   if (!confirm(`Advance the pool from Week ${settings.current_week} to Week ${nextWeek}?`)) return;
 
   const { data, error } = await sb.rpc("commissioner_advance_week");
-  if (error) return msg("commissionerMessage", error.message, true);
+  if (error) return msg("commissionerMessage", error, true);
 
   settings = { ...settings, ...(data || {}) };
   $("adminWeek").value = settings.current_week;
@@ -591,12 +679,116 @@ async function createInvitation(event) {
   const { error } = await sb.rpc("commissioner_create_invite", {
     p_first_name:firstName, p_last_name:lastName, p_email:email
   });
-  if (error) return msg("commissionerMessage", error.message, true);
+  if (error) return msg("commissionerMessage", error, true);
 
   $("inviteForm").reset();
   $("inviteForm").classList.add("hidden");
   msg("commissionerMessage", `Invitation prepared for ${firstName}.`);
   await loadSharedData();
+}
+
+function formatBoardUpdated(value) {
+  if (!value) return "â";
+  const date = new Date(value);
+  const today = new Date();
+  const sameDay =
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate();
+
+  return sameDay
+    ? date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    : `${date.toLocaleDateString([], { month: "short", day: "numeric" })} ${date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+}
+
+function renderCommissionerPlayerBoard() {
+  if (!me?.is_admin || !$("commissionerPlayerBoard")) return;
+
+  const profileNames = new Set(
+    allProfiles.map(player => `${player.first_name} ${player.last_name}`.trim().toLowerCase())
+  );
+
+  const rows = [
+    ...allProfiles.map(player => {
+      const pick = currentWeekPicks.find(item => item.user_id === player.id);
+      return {
+        avatar: player.avatar,
+        name: `${player.first_name} ${player.last_name}`.trim(),
+        nickname: player.nickname,
+        status: player.eliminated ? "On the Bench" : player.is_admin ? "Commissioner" : "Joined",
+        pick: pick?.team_name || "",
+        updated: pick?.updated_at || pick?.created_at || "",
+        mulligans: Math.max(0, 2 - Number(player.losses || 0))
+      };
+    }),
+    ...allInvites
+      .filter(invite =>
+        invite.status !== "joined" &&
+        !profileNames.has(`${invite.first_name} ${invite.last_name}`.trim().toLowerCase())
+      )
+      .map(invite => ({
+        avatar: "INV",
+        name: `${invite.first_name} ${invite.last_name}`.trim(),
+        nickname: "",
+        status: "Invited",
+        pick: "",
+        updated: "",
+        mulligans: 2
+      }))
+  ];
+
+  const activePlayers = allProfiles.filter(player => !player.eliminated);
+  const submitted = activePlayers.filter(player =>
+    currentWeekPicks.some(pick => pick.user_id === player.id)
+  ).length;
+  const waiting = Math.max(0, activePlayers.length - submitted);
+  const bench = allProfiles.filter(player => player.eliminated).length;
+
+  $("boardWeek").textContent = settings.current_week;
+  $("boardRegistered").textContent = `${allProfiles.length} / ${Number(settings.max_survivors || 20)}`;
+  $("boardJoined").textContent = allProfiles.length;
+  $("boardPicksSubmitted").textContent = submitted;
+  $("boardWaiting").textContent = waiting;
+  $("boardBench").textContent = bench;
+
+  $("missingPickAlert").textContent = waiting
+    ? `${waiting} active ${waiting === 1 ? "player still needs" : "players still need"} a Week ${settings.current_week} pick.`
+    : `All active players have submitted a Week ${settings.current_week} pick.`;
+  $("missingPickAlert").className = `missing-pick-alert ${waiting ? "warning" : "clear"}`;
+
+  const search = $("playerSearch")?.value?.trim().toLowerCase() || "";
+  const filtered = rows.filter(row =>
+    `${row.name} ${row.nickname} ${row.status} ${row.pick}`.toLowerCase().includes(search)
+  );
+
+  $("commissionerPlayerBoard").innerHTML = filtered.map(row => {
+    const statusClass =
+      row.status === "On the Bench" ? "out-b" :
+      row.status === "Invited" ? "danger-b" :
+      row.status === "Commissioner" ? "status-commissioner" : "active-b";
+
+    return `
+      <tr>
+        <td>
+          <div class="player-board-player">
+            <div class="mini-avatar">${esc(row.avatar)}</div>
+            <div>
+              <strong>${esc(row.nickname || row.name)}</strong>
+              ${row.nickname ? `<div class="small">${esc(row.name)}</div>` : ""}
+            </div>
+          </div>
+        </td>
+        <td><span class="badge ${statusClass}">${esc(row.status)}</span></td>
+        <td class="${row.pick ? "pick-present" : "pick-missing"}">${row.pick ? esc(row.pick) : "No pick yet"}</td>
+        <td>${row.updated ? esc(formatBoardUpdated(row.updated)) : "â"}</td>
+        <td>${row.mulligans}</td>
+      </tr>`;
+  }).join("");
+
+  if (!$("playerSearch").dataset.bound) {
+    $("playerSearch").addEventListener("input", renderCommissionerPlayerBoard);
+    $("playerSearch").dataset.bound = "true";
+  }
 }
 
 function renderLockerRoom() {
@@ -619,20 +811,33 @@ function renderLockerRoom() {
 
 window.togglePaid = async (profileId, paid) => {
   const { error } = await sb.rpc("commissioner_update_profile",{p_profile_id:profileId,p_paid:paid,p_eliminated:null});
-  if (error) return msg("commissionerMessage", error.message, true);
+  if (error) return msg("commissionerMessage", error, true);
   await loadSharedData();
 };
 
 window.toggleBench = async (profileId, eliminated) => {
   const { error } = await sb.rpc("commissioner_update_profile",{p_profile_id:profileId,p_paid:null,p_eliminated:eliminated});
-  if (error) return msg("commissionerMessage", error.message, true);
+  if (error) return msg("commissionerMessage", error, true);
   await loadSharedData();
 };
 
 function renderInvitations() {
   $("invitationList").innerHTML = allInvites.length ? allInvites.map(invite => {
+    const inviteUrl = new URL(window.location.origin + "/");
+    inviteUrl.searchParams.set("join", "1");
+    inviteUrl.searchParams.set("first", invite.first_name);
+    inviteUrl.searchParams.set("last", invite.last_name);
+    inviteUrl.searchParams.set("email", invite.email);
+    inviteUrl.searchParams.set("code", settings.pool_code);
+
     const subject = encodeURIComponent("NFL Summerland Survivor Pool Invitation");
-    const body = encodeURIComponent(`Hi ${invite.first_name},\n\nYou are invited to join the NFL Summerland Survivor Pool.\n\nOpen ${window.location.origin}/ and choose Join Pool.\nUse pool code: ${settings.pool_code}\n\nOne Winning Pick. Every Week. Last Survivor Standing.`);
+    const body = encodeURIComponent(
+      `Hi ${invite.first_name},\n\n` +
+      `You are invited to join the NFL Summerland Survivor Pool.\n\n` +
+      `Tap this personalized link:\n${inviteUrl.toString()}\n\n` +
+      `Create a password and select Create My Entry.\n\n` +
+      `One Winning Pick. Every Week. Last Survivor Standing.`
+    );
     return `<div class="locker-card">
       <div><strong>${esc(invite.first_name)} ${esc(invite.last_name)}</strong><div class="email-link">${esc(invite.email)}</div></div>
       <div><span class="badge ${invite.status==="joined"?"active-b":"danger-b"}">${esc(invite.status)}</span></div>
@@ -647,7 +852,7 @@ function renderInvitations() {
 window.deleteInvitation = async inviteId => {
   if (!confirm("Remove this invitation?")) return;
   const { error } = await sb.rpc("commissioner_delete_invite",{p_invite_id:inviteId});
-  if (error) return msg("commissionerMessage", error.message, true);
+  if (error) return msg("commissionerMessage", error, true);
   await loadSharedData();
 };
 
@@ -665,7 +870,7 @@ async function finalizeWeek() {
     .eq("result", "pending");
 
   if (error) {
-    return msg("commissionerMessage", error.message, true);
+    return msg("commissionerMessage", error, true);
   }
 
   for (const pick of pendingPicks || []) {
@@ -689,6 +894,7 @@ async function finalizeWeek() {
     "commissionerMessage",
     "Completed results, mulligans, and bench status updated."
   );
+
   await loadApp({ id: me.id });
 }
 
