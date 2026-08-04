@@ -101,22 +101,22 @@ async function checkPlayerNameAvailability() {
   playerNameAvailable = false;
 
   if (!validPlayerName(name)) {
-    status.textContent = name.length < 2
-      ? "Use 2â20 characters."
-      : "Use letters, numbers, spaces, periods, apostrophes, hyphens or &.";
-    status.className = "player-name-status unavailable";
-    return false;
-  }
+  status.textContent = name
+    ? "Use 2-20 characters."
+    : "";
+  status.className = "player-name-status unavailable";
+  return false;
+}
 
-  status.textContent = "Checking availabilityâ¦";
-  status.className = "player-name-status checking";
+const { data, error } = await sb.rpc("is_player_name_available", {
+  p_name: name
+});
 
-  const { data, error } = await sb.rpc("is_player_name_available", { p_name: name });
-  if (error) {
-    status.textContent = "Unable to check right now.";
-    status.className = "player-name-status unavailable";
-    return false;
-  }
+if (error) {
+  status.textContent = "Unable to check right now.";
+  status.className = "player-name-status unavailable";
+  return false;
+}
 
   playerNameAvailable = Boolean(data);
   status.textContent = playerNameAvailable ? "Available" : "Already taken";
