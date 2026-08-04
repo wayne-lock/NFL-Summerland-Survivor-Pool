@@ -357,3 +357,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .inline-actions{display:flex;gap:10px;flex-wrap:wrap}
 .inline-actions button{width:auto}
 @media(max-width:640px){.inline-actions button{flex:1}.compact-btn{width:100%}}
+
+
+/* Version 2.2 - Avatar Selection */
+.avatar-picker{display:grid;grid-template-columns:repeat(6,minmax(42px,1fr));gap:10px;margin:8px 0 18px}
+.avatar-choice{min-height:50px;padding:6px;border:2px solid #d7dee8;border-radius:14px;background:#fff;font-size:26px;line-height:1;box-shadow:none}
+.avatar-choice:hover{transform:none}
+.avatar-choice.selected{border-color:#18794e;background:#eaf7ef;box-shadow:0 0 0 3px rgba(24,121,78,.12)}
+.identity-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+@media (max-width:520px){.avatar-picker{grid-template-columns:repeat(4,minmax(46px,1fr))}}
