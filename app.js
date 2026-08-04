@@ -119,7 +119,7 @@ async function checkPlayerNameAvailability() {
   }
 
   playerNameAvailable = Boolean(data);
-  status.textContent = playerNameAvailable ? "â Available" : "â Already taken";
+  status.textContent = playerNameAvailable ? "Available" : "Already taken";
   status.className = `player-name-status ${playerNameAvailable ? "available" : "unavailable"}`;
   return playerNameAvailable;
 }
