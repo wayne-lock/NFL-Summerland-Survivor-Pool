@@ -6,17 +6,22 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>NFL Summerland Survivor Pool</title>
+  <title>Season of the Survivors | Summerland NFL Pool</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<header>
-  <div>
-    <h1>NFL Summerland Survivor Pool</h1>
-    <div class="tagline">One Winning Pick</div>
-    <p>Every Week &bull; Last Survivor Standing</p>
-    <p class="season"><span id="seasonDisplay">2026</span> Season</p>
+<div class="stadium-scene" aria-hidden="true"><div class="stadium-glow glow-left"></div><div class="stadium-glow glow-right"></div><div class="field-lines"></div></div>
+<header class="hero-header">
+  <div class="brand-lockup">
+    <div class="brand-emblem" aria-hidden="true"><span></span></div>
+    <div class="brand-copy">
+      <div class="eyebrow">SUMMERLAND NFL SURVIVOR POOL</div>
+      <h1>Season of the Survivors</h1>
+      <div class="tagline">One Pick. Every Week.</div>
+      <p>Last Survivor Standing.</p>
+      <p class="season"><span id="seasonDisplay">2026</span> Season</p>
+    </div>
   </div>
   <button id="logoutBtn" class="secondary hidden">Sign Out</button>
 </header>
@@ -29,17 +34,18 @@
 
   <section id="authView" class="panel auth">
     <div class="auth-intro">
-      <h2>One Winning Pick</h2>
-      <p>Choose one NFL winner each week. Two mulligans keep you alive. A third loss puts you on the bench.</p>
+      <div class="auth-kicker">WELCOME TO GAME DAY</div>
+      <h2>One pick can keep you alive.</h2>
+      <p>Choose one NFL winner each week. Two mulligans keep you in the game. A third loss sends you to the bench.</p>
     </div>
 
     <div class="tabs">
-      <button id="loginTab" class="tab active">Sign In</button>
-      <button id="signupTab" class="tab">Join Pool</button>
+      <button id="loginTab" class="tab active">Player / Commissioner Sign In</button>
+      <button id="signupTab" class="tab">Join the Pool</button>
     </div>
 
     <form id="loginForm">
-      <h2>Survivor Sign In</h2>
+      <h2>Welcome Back</h2>
       <label>Email</label>
       <input id="loginEmail" type="email" required>
       <label>Password</label>
@@ -48,7 +54,8 @@
     </form>
 
     <form id="signupForm" class="hidden">
-      <h2>Join the Pool</h2>
+      <h2>Welcome to the Locker Room</h2>
+      <p class="form-intro">Create your Player Identity and enter this season's competition.</p>
       <label>First name</label>
       <input id="firstName" required maxlength="30">
       <label>Last name</label>
@@ -65,7 +72,7 @@
       <input id="signupPassword" type="password" minlength="6" required>
       <label>Pool code</label>
       <input id="poolCode" required placeholder="Provided by the Commissioner">
-      <button type="submit">Create My Entry</button>
+      <button type="submit" class="primary-cta">Create My Entry</button>
       <p class="small">Your Player Name is public. Your real name is visible only in the Commissioner view.</p>
     </form>
 
@@ -73,6 +80,7 @@
   </section>
 
   <section id="appView" class="hidden">
+    <div class="game-day-strip"><span>GAME DAY CONTROL</span><strong>Season of the Survivors</strong></div>
     <div class="summary">
       <div class="stat"><strong id="currentWeek">1</strong><span>Current Week</span></div>
       <div class="stat"><strong id="playerCount">0</strong><span>Survivors</span></div>
@@ -112,7 +120,7 @@
     </div>
 
     <section id="commissionerPanel" class="panel hidden">
-      <h2>Commissioner Dashboard</h2>
+      <div class="section-title-row"><div><div class="eyebrow dark">GAME CONTROL</div><h2>Commissioner Command Centre</h2></div><span class="live-chip"><i></i> LIVE</span></div>
 
       <div class="commissioner-cards">
         <div class="commissioner-card"><span>Season</span><strong id="commissionerSeason">â</strong></div>
@@ -255,7 +263,7 @@
   </section>
 </main>
 
-<footer>Good luck... survive another week.</footer>
+<footer><strong>One Pick. Every Week.</strong><span>Survive another week.</span></footer>
 
 <script src="config.js"></script>
 <script src="app.js"></script>
