@@ -185,6 +185,44 @@
 
       <hr class="section-rule">
 
+      <section class="commissioner-weekly-board">
+        <div class="weekly-board-heading">
+          <div>
+            <h3>Week <span id="boardWeek">â</span> Player Board</h3>
+            <p class="small">Live pool status. Refresh the page to see the latest changes.</p>
+          </div>
+          <div id="missingPickAlert" class="missing-pick-alert"></div>
+        </div>
+
+        <div class="weekly-summary-grid">
+          <div class="weekly-summary-card"><span>Registered</span><strong id="boardRegistered">â</strong></div>
+          <div class="weekly-summary-card"><span>Joined</span><strong id="boardJoined">â</strong></div>
+          <div class="weekly-summary-card"><span>Picks Submitted</span><strong id="boardPicksSubmitted">â</strong></div>
+          <div class="weekly-summary-card"><span>Waiting</span><strong id="boardWaiting">â</strong></div>
+          <div class="weekly-summary-card"><span>On the Bench</span><strong id="boardBench">â</strong></div>
+        </div>
+
+        <label for="playerSearch">Search players</label>
+        <input id="playerSearch" type="search" placeholder="Search by player, status or pick">
+
+        <div class="player-board-wrap">
+          <table class="player-board-table">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Status</th>
+                <th>Current Pick</th>
+                <th>Updated</th>
+                <th>Mulligans</th>
+              </tr>
+            </thead>
+            <tbody id="commissionerPlayerBoard"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="section-rule">
+
       <div class="locker-header" id="lockerRoomSection">
         <div>
           <h3>Locker Room</h3>
