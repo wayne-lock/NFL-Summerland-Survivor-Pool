@@ -56,6 +56,9 @@
       <label>Player Name</label>
       <input id="playerName" required maxlength="20" autocomplete="off" placeholder="Example: Sunday Sniper">
       <div id="playerNameStatus" class="player-name-status">Choose the name other players will see.</div>
+      <label>Choose Your Avatar</label>
+      <div id="signupAvatarPicker" class="avatar-picker" aria-label="Choose your avatar"></div>
+      <input id="selectedAvatar" type="hidden" value="ð">
       <label>Email</label>
       <input id="signupEmail" type="email" required>
       <label>Password</label>
@@ -71,11 +74,11 @@
 
   <section id="appView" class="hidden">
     <div class="summary">
-      <div class="stat"><strong id="currentWeek">1</strong><span>Current Week</span></div>
-      <div class="stat"><strong id="playerCount">0</strong><span>Survivors</span></div>
-      <div class="stat"><strong id="activeCount">0</strong><span>Still in the Game</span></div>
-      <div class="stat"><strong id="benchCount">0</strong><span>On the Bench</span></div>
-      <div class="stat"><strong id="prizeTotal">$0</strong><span>Prize Pool</span></div>
+      <div class="stat"><strong id="currentWeek">1</strong><span>Current Week</span></div>
+      <div class="stat"><strong id="playerCount">0</strong><span>Survivors</span></div>
+      <div class="stat"><strong id="activeCount">0</strong><span>Still in the Game</span></div>
+      <div class="stat"><strong id="benchCount">0</strong><span>On the Bench</span></div>
+      <div class="stat"><strong id="prizeTotal">$0</strong><span>Prize Pool</span></div>
     </div>
 
     <div class="layout">
@@ -84,7 +87,7 @@
 
         <section id="currentPickCard" class="current-pick-card">
           <div class="current-pick-heading">
-            <span>YOUR WEEK <strong id="pickCardWeek">â</strong> PICK</span>
+            <span>YOUR WEEK <strong id="pickCardWeek">1</strong> PICK</span>
             <span id="pickCardBadge" class="badge danger-b">Not Selected</span>
           </div>
           <div id="pickCardTeam" class="pick-card-team">No pick submitted yet</div>
