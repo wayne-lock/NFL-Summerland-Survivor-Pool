@@ -53,6 +53,9 @@
       <input id="firstName" required maxlength="30">
       <label>Last name</label>
       <input id="lastName" required maxlength="40">
+      <label>Player Name</label>
+      <input id="playerName" required maxlength="20" autocomplete="off" placeholder="Example: Sunday Sniper">
+      <div id="playerNameStatus" class="player-name-status">Choose the name other players will see.</div>
       <label>Email</label>
       <input id="signupEmail" type="email" required>
       <label>Password</label>
@@ -60,7 +63,7 @@
       <label>Pool code</label>
       <input id="poolCode" required placeholder="Provided by the Commissioner">
       <button type="submit">Create My Entry</button>
-      <p class="small">Your nickname uses your first name. A last-name identifier is added only when needed.</p>
+      <p class="small">Your Player Name is public. Your real name is visible only in the Commissioner view.</p>
     </form>
 
     <p id="authMessage" class="message"></p>
