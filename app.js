@@ -404,7 +404,7 @@ async function loadSharedData() {
       .select("id,first_name,last_name,nickname,avatar,losses,eliminated,paid,is_admin,created_at")
       .order("created_at"),
     sb.from("picks")
-      .select("id,user_id,week,team_abbr,team_name,game_id,game_kickoff,result,created_at,updated_at")
+      .select("id,user_id,week,team_abbr,team_name,game_id,game_kickoff,result,auto_assigned,created_at,updated_at")
       .eq("week", settings.current_week)
   ];
   if (me.is_admin) requests.push(sb.from("pool_invites").select("*").order("created_at", { ascending:false }));
@@ -434,7 +434,7 @@ async function loadSharedData() {
 
   const { data: myPicks, error: myPicksError } = await sb
     .from("picks")
-    .select("id,week,team_abbr,team_name,game_id,game_kickoff,result,created_at,updated_at")
+    .select("id,week,team_abbr,team_name,game_id,game_kickoff,result,auto_assigned,created_at,updated_at")
     .eq("user_id", me.id)
     .order("week");
 
@@ -537,9 +537,11 @@ function renderCurrentPickCard() {
   $("pickCardBadge").textContent = locked ? "Locked" : "Confirmed";
   $("pickCardBadge").className = `badge ${locked ? "out-b" : "active-b"}`;
   $("pickCardTeam").textContent = currentPick.team_name;
-  $("pickCardDetails").textContent = locked
-    ? `Locked for Week ${settings.current_week}. Good luck!`
-    : `Last changed ${new Date(lastChanged).toLocaleString()}. You may change it before the automatic lock.`;
+  $("pickCardDetails").textContent = currentPick.auto_assigned
+    ? `Emergency auto-pick assigned because no selection was submitted before the weekly safeguard.`
+    : locked
+      ? `Locked for Week ${settings.current_week}. Good luck!`
+      : `Last changed ${new Date(lastChanged).toLocaleString()}. You may change it before the automatic lock.`;
 
   const updateCountdown = () => {
     if (!lockTime) {
@@ -565,6 +567,29 @@ function renderCurrentPickCard() {
 
   updateCountdown();
   if (!locked) pickCountdownTimer = setInterval(updateCountdown, 30000);
+}
+
+async function syncWeeklyGamesForSafeguard() {
+  if (!me?.is_admin || !games.length) return;
+
+  const scheduleRows = games.map(game => ({
+    season: Number(settings.season),
+    week: Number(settings.current_week),
+    game_id: String(game.id),
+    kickoff: game.date,
+    home_abbr: game.home.abbr,
+    home_name: game.home.name,
+    away_abbr: game.away.abbr,
+    away_name: game.away.name
+  }));
+
+  const { error } = await sb.rpc("commissioner_sync_weekly_games", {
+    p_games: scheduleRows
+  });
+
+  if (error) {
+    console.error("No-pick safeguard schedule sync failed:", error);
+  }
 }
 
 async function loadSchedule() {
@@ -600,6 +625,7 @@ async function loadSchedule() {
       };
     });
 
+    await syncWeeklyGamesForSafeguard();
     renderGames();
 
     msg(
@@ -1042,4 +1068,4 @@ async function finalizeWeek() {
   await loadApp({ id: me.id });
 }
 
-boot()
+boot();
