@@ -23,6 +23,24 @@ let pickCountdownTimer = null;
 let playerNameCheckTimer = null;
 let playerNameAvailable = false;
 
+const AVATAR_CHOICES = ["🏈", "🦬", "🦅", "🐻", "🦁", "🐺", "🦈", "🐂", "⚡", "🔥", "🚀", "⭐", "🏆", "👑", "🛡️", "🎯", "🤠", "😎", "🧙", "🥷"];
+let selectedSignupAvatar = "🏈";
+
+function renderAvatarPicker(containerId, selected, onSelect) {
+  const container = $(containerId);
+  if (!container) return;
+  container.innerHTML = AVATAR_CHOICES.map(avatar => `
+    <button type="button" class="avatar-choice ${avatar === selected ? "selected" : ""}" data-avatar="${esc(avatar)}" aria-label="Select ${esc(avatar)}">${esc(avatar)}</button>
+  `).join("");
+  container.querySelectorAll(".avatar-choice").forEach(button => {
+    button.onclick = () => {
+      container.querySelectorAll(".avatar-choice").forEach(item => item.classList.remove("selected"));
+      button.classList.add("selected");
+      onSelect(button.dataset.avatar);
+    };
+  });
+}
+
 if (!configured) $("setupWarning").classList.remove("hidden");
 
 $("loginTab").onclick = () => switchAuth(true);
@@ -101,22 +119,20 @@ async function checkPlayerNameAvailability() {
   playerNameAvailable = false;
 
   if (!validPlayerName(name)) {
-  status.textContent = name
-    ? "Use 2-20 characters."
-    : "";
-  status.className = "player-name-status unavailable";
-  return false;
-}
+    status.textContent = name ? "Use 2-20 characters." : "";
+    status.className = "player-name-status unavailable";
+    return false;
+  }
 
-const { data, error } = await sb.rpc("is_player_name_available", {
-  p_name: name
-});
+  status.textContent = "Checking availability...";
+  status.className = "player-name-status checking";
 
-if (error) {
-  status.textContent = "Unable to check right now.";
-  status.className = "player-name-status unavailable";
-  return false;
-}
+  const { data, error } = await sb.rpc("is_player_name_available", { p_name: name });
+  if (error) {
+    status.textContent = "Unable to check right now.";
+    status.className = "player-name-status unavailable";
+    return false;
+  }
 
   playerNameAvailable = Boolean(data);
   status.textContent = playerNameAvailable ? "Available" : "Already taken";
@@ -128,6 +144,11 @@ $("playerName")?.addEventListener("input", () => {
   playerNameAvailable = false;
   clearTimeout(playerNameCheckTimer);
   playerNameCheckTimer = setTimeout(checkPlayerNameAvailability, 350);
+});
+
+renderAvatarPicker("signupAvatarPicker", selectedSignupAvatar, avatar => {
+  selectedSignupAvatar = avatar;
+  $("selectedAvatar").value = avatar;
 });
 
 $("loginForm").onsubmit = async event => {
@@ -155,6 +176,7 @@ $("signupForm").onsubmit = async event => {
   const lastName = $("lastName").value.trim();
   const playerName = normalizePlayerName($("playerName").value);
   const poolCode = $("poolCode").value.trim();
+  const avatar = $("selectedAvatar")?.value || selectedSignupAvatar;
 
   if (!validPlayerName(playerName) || !(await checkPlayerNameAvailability())) {
     msg("authMessage", "Please choose an available Player Name.", true);
@@ -175,6 +197,7 @@ $("signupForm").onsubmit = async event => {
           first_name: firstName,
           last_name: lastName,
           player_name: playerName,
+          avatar,
           pool_code: poolCode
         }
       }
@@ -202,6 +225,12 @@ $("signupForm").onsubmit = async event => {
     );
 
     $("signupForm").reset();
+    selectedSignupAvatar = "🏈";
+    $("selectedAvatar").value = selectedSignupAvatar;
+    renderAvatarPicker("signupAvatarPicker", selectedSignupAvatar, avatar => {
+      selectedSignupAvatar = avatar;
+      $("selectedAvatar").value = avatar;
+    });
     playerNameAvailable = false;
     $("playerNameStatus").textContent = "Choose the name other players will see.";
     $("playerNameStatus").className = "player-name-status";
@@ -305,13 +334,21 @@ function renderIdentity() {
         <h2>${esc(me.nickname)}</h2>
         <div class="identity-status">${esc(status)}</div>
         <div class="small">Losses: ${Number(me.losses || 0)} &bull; Mulligans remaining: ${Math.max(0, 2 - Number(me.losses || 0))}</div>
-        ${canEditPlayerName ? `<button id="editPlayerNameBtn" class="secondary compact-btn">Change Player Name</button>` : `<div class="small locked-name">Player Name locked for this season.</div>`}
+        ${canEditPlayerName ? `<div class="identity-actions"><button id="editPlayerNameBtn" class="secondary compact-btn">Change Player Name</button><button id="editAvatarBtn" class="secondary compact-btn">Change Avatar</button></div>` : `<div class="small locked-name">Player identity locked for this season.</div>`}
+      </div>
+    </div>
+    <div id="avatarEditor" class="player-name-editor hidden">
+      <label>Choose Your Avatar</label>
+      <div id="editAvatarPicker" class="avatar-picker"></div>
+      <div class="inline-actions">
+        <button id="saveAvatarBtn">Save Avatar</button>
+        <button id="cancelAvatarBtn" class="secondary">Cancel</button>
       </div>
     </div>
     <div id="playerNameEditor" class="player-name-editor hidden">
       <label>New Player Name</label>
       <input id="editPlayerName" maxlength="20" value="${esc(me.nickname)}">
-      <div id="editPlayerNameStatus" class="player-name-status">Use 2â20 characters.</div>
+      <div id="editPlayerNameStatus" class="player-name-status">Use 2–20 characters.</div>
       <div class="inline-actions">
         <button id="savePlayerNameBtn">Save Player Name</button>
         <button id="cancelPlayerNameBtn" class="secondary">Cancel</button>
@@ -320,18 +357,33 @@ function renderIdentity() {
 
   if (!canEditPlayerName) return;
 
+  let pendingAvatar = me.avatar || "🏈";
+  renderAvatarPicker("editAvatarPicker", pendingAvatar, avatar => { pendingAvatar = avatar; });
+  $("editAvatarBtn").onclick = () => $("avatarEditor").classList.remove("hidden");
+  $("cancelAvatarBtn").onclick = () => $("avatarEditor").classList.add("hidden");
+  $("saveAvatarBtn").onclick = async () => {
+    const { data, error } = await sb.rpc("change_my_avatar", { p_avatar: pendingAvatar });
+    if (error) {
+      alert(readableError(error));
+      return;
+    }
+    me.avatar = data;
+    await loadSharedData();
+    renderIdentity();
+  };
+
   $("editPlayerNameBtn").onclick = () => $("playerNameEditor").classList.remove("hidden");
   $("cancelPlayerNameBtn").onclick = () => $("playerNameEditor").classList.add("hidden");
   $("savePlayerNameBtn").onclick = async () => {
     const name = normalizePlayerName($("editPlayerName").value);
     const statusEl = $("editPlayerNameStatus");
     if (!validPlayerName(name)) {
-      statusEl.textContent = "Use 2â20 valid characters.";
+      statusEl.textContent = "Use 2–20 valid characters.";
       statusEl.className = "player-name-status unavailable";
       return;
     }
 
-    statusEl.textContent = "Savingâ¦";
+    statusEl.textContent = "Saving…";
     statusEl.className = "player-name-status checking";
     const { data, error } = await sb.rpc("change_my_player_name", { p_name: name });
     if (error) {
@@ -498,7 +550,7 @@ function renderCurrentPickCard() {
     const remaining = lockTime.getTime() - Date.now();
     if (remaining <= 0 || settings.picks_open === false) {
       $("pickCardCountdown").textContent =
-        `Locked at ${lockTime.toLocaleString()} â 15 minutes before kickoff`;
+        `Locked at ${lockTime.toLocaleString()} — 15 minutes before kickoff`;
       $("currentPickCard").classList.add("locked");
       $("pickCardBadge").textContent = "Locked";
       $("pickCardBadge").className = "badge out-b";
@@ -780,7 +832,7 @@ async function createInvitation(event) {
 }
 
 function formatBoardUpdated(value) {
-  if (!value) return "â";
+  if (!value) return "—";
   const date = new Date(value);
   const today = new Date();
   const sameDay =
@@ -872,7 +924,7 @@ function renderCommissionerPlayerBoard() {
         </td>
         <td><span class="badge ${statusClass}">${esc(row.status)}</span></td>
         <td class="${row.pick ? "pick-present" : "pick-missing"}">${row.pick ? esc(row.pick) : "No pick yet"}</td>
-        <td>${row.updated ? esc(formatBoardUpdated(row.updated)) : "â"}</td>
+        <td>${row.updated ? esc(formatBoardUpdated(row.updated)) : "—"}</td>
         <td>${row.mulligans}</td>
       </tr>`;
   }).join("");
@@ -990,4 +1042,4 @@ async function finalizeWeek() {
   await loadApp({ id: me.id });
 }
 
-boot();
+boot()
