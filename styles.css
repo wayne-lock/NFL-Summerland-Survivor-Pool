@@ -480,3 +480,222 @@ footer{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;color:#52687a;
 @media(max-width:520px){
   .hero-header{min-height:275px}.brand-emblem{display:none}.hero-header h1{font-size:37px}.hero-header #logoutBtn{position:absolute;right:14px;top:12px;padding:8px 10px}.auth .tabs{flex-direction:column}.auth form,.auth-intro{padding-left:20px;padding-right:20px}.panel{border-radius:17px;padding:14px}.summary{gap:8px}.stat{padding:13px 8px}.stat strong{font-size:26px}.section-title-row{display:block}.live-chip{margin-top:10px}.control-heading{display:block}.system-status{margin-top:10px}.avatar-picker{grid-template-columns:repeat(4,minmax(46px,1fr))}
 }
+
+/* =========================================================
+   Season of the Survivors v3.2 â Launch Edition
+   Build 2: Championship landing page and unified game-day theme
+   ========================================================= */
+:root{
+  --sos-night:#020815;
+  --sos-navy:#07172c;
+  --sos-navy-2:#0b2748;
+  --sos-blue:#155b9a;
+  --sos-gold:#f5c451;
+  --sos-gold-deep:#b77a12;
+  --sos-silver:#dce5ef;
+  --sos-green:#5fd238;
+  --sos-panel:rgba(5,18,36,.94);
+  --sos-line:rgba(184,208,234,.28);
+}
+
+html{min-height:100%;background:var(--sos-night)}
+body{
+  min-height:100%;
+  overflow-x:hidden;
+  color:#f6f8fb;
+  background:
+    radial-gradient(circle at 50% 12%,rgba(38,93,148,.38),transparent 30%),
+    linear-gradient(180deg,#031020 0%,#07162a 44%,#03101c 70%,#020713 100%);
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-4;
+  background:
+    linear-gradient(115deg,transparent 0 10%,rgba(255,255,255,.12) 10.15% 10.35%,transparent 10.5% 100%),
+    linear-gradient(245deg,transparent 0 10%,rgba(255,255,255,.12) 10.15% 10.35%,transparent 10.5% 100%),
+    radial-gradient(ellipse at 50% 88%,rgba(38,119,67,.5),transparent 44%);
+}
+
+.stadium-scene{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-3}
+.stadium-scene::before{
+  content:"";position:absolute;left:-8%;right:-8%;bottom:-12%;height:48%;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 11.5%,rgba(255,255,255,.06) 11.6% 11.8%,transparent 11.9% 23%),
+    repeating-linear-gradient(0deg,transparent 0 17%,rgba(255,255,255,.06) 17.2% 17.5%,transparent 17.8% 34%),
+    linear-gradient(180deg,#163f28,#06180f 74%);
+  clip-path:polygon(0 26%,100% 26%,93% 100%,7% 100%);
+  opacity:.72;
+}
+.stadium-scene::after{
+  content:"";position:absolute;left:-5%;right:-5%;top:17%;height:31%;
+  border-top:2px solid rgba(255,255,255,.12);
+  border-bottom:2px solid rgba(255,255,255,.08);
+  background:
+    radial-gradient(circle at 2% 50%,rgba(255,255,255,.75) 0 1px,transparent 2px) 0 0/9px 7px,
+    linear-gradient(180deg,rgba(5,11,20,.45),rgba(2,7,14,.9));
+  transform:perspective(800px) rotateX(-8deg);
+  opacity:.65;
+}
+.stadium-glow{position:absolute;top:-7%;width:44%;height:55%;filter:blur(16px);opacity:.62}
+.glow-left{left:-10%;background:radial-gradient(circle at 25% 20%,#fff 0 1.5%,#8bc8ff 2%,rgba(68,151,230,.23) 18%,transparent 48%)}
+.glow-right{right:-10%;background:radial-gradient(circle at 75% 20%,#fff 0 1.5%,#8bc8ff 2%,rgba(68,151,230,.23) 18%,transparent 48%)}
+.field-lines{position:absolute;inset:auto 0 0;height:28%;opacity:.32;background:linear-gradient(90deg,transparent 49.75%,#fff 49.9% 50.1%,transparent 50.25%)}
+
+.hero-header{
+  max-width:1180px;
+  margin:0 auto;
+  padding:18px 22px 8px;
+  background:transparent;
+  min-height:0;
+}
+.brand-lockup{display:none}
+.hero-header #logoutBtn{margin-left:auto;position:relative;z-index:20}
+
+main{max-width:1180px;padding:12px 18px 22px}
+.launch-auth{
+  max-width:none;
+  margin:0 auto 22px;
+  padding:0;
+  overflow:hidden;
+  border:1px solid rgba(232,196,95,.38);
+  border-radius:26px;
+  background:rgba(3,11,22,.72);
+  box-shadow:0 30px 90px rgba(0,0,0,.56),0 0 50px rgba(46,121,199,.13);
+  backdrop-filter:blur(14px);
+}
+.launch-hero{
+  position:relative;
+  min-height:720px;
+  padding:38px 38px 28px;
+  display:grid;
+  grid-template-columns:minmax(240px,.85fr) minmax(410px,1.7fr);
+  grid-template-areas:
+    "crest copy"
+    "crest actions"
+    "note note";
+  gap:18px 38px;
+  align-items:center;
+  isolation:isolate;
+  overflow:hidden;
+  background:
+    linear-gradient(90deg,rgba(1,7,16,.92) 0%,rgba(3,13,27,.72) 40%,rgba(4,15,30,.84) 100%),
+    radial-gradient(circle at 76% 26%,rgba(48,117,185,.28),transparent 34%);
+}
+.launch-hero::before{
+  content:"";position:absolute;inset:0;z-index:-2;
+  background:
+    radial-gradient(circle at 5% 22%,rgba(255,255,255,.9) 0 .2%,rgba(137,200,255,.28) .3% 3%,transparent 13%),
+    radial-gradient(circle at 95% 22%,rgba(255,255,255,.9) 0 .2%,rgba(137,200,255,.28) .3% 3%,transparent 13%),
+    linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.55));
+}
+.launch-hero::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:34%;z-index:-1;
+  background:linear-gradient(180deg,rgba(17,82,42,.18),rgba(4,31,18,.92));
+  border-top:1px solid rgba(164,224,183,.16);
+}
+.sos-crest{grid-area:crest;align-self:center;justify-self:center;width:min(100%,360px);filter:drop-shadow(0 18px 30px rgba(0,0,0,.58)) drop-shadow(0 0 18px rgba(245,196,81,.18))}
+.sos-crest-svg{display:block;width:100%;height:auto;max-height:470px}
+.launch-copy{grid-area:copy;align-self:end;text-align:center;padding:0 10px}
+.launch-kicker{font-size:clamp(14px,1.7vw,21px);font-weight:900;letter-spacing:.18em;color:var(--sos-gold);text-transform:uppercase;text-shadow:0 2px 10px #000}
+.launch-title{
+  margin:12px 0 8px;
+  color:#fff;
+  font-family:Impact,"Arial Black",Arial,sans-serif;
+  font-size:clamp(48px,7vw,94px);
+  line-height:.9;
+  letter-spacing:.025em;
+  text-transform:uppercase;
+  text-shadow:0 4px 0 #26313d,0 8px 20px #000,0 0 26px rgba(245,196,81,.14);
+}
+.launch-tagline{margin:20px 0 0;color:#fff;font-size:clamp(18px,2.3vw,27px);line-height:1.35;font-weight:900;text-shadow:0 2px 12px #000}
+.launch-actions{grid-area:actions;display:grid;gap:14px;width:min(100%,610px);margin:0 auto;align-self:start}
+.launch-button{
+  width:100%;
+  min-height:92px;
+  margin:0;
+  padding:15px 22px;
+  display:grid;
+  grid-template-columns:58px 1fr 24px;
+  align-items:center;
+  gap:14px;
+  text-align:left;
+  border:2px solid rgba(220,232,245,.58);
+  border-radius:16px;
+  color:#fff;
+  background:linear-gradient(180deg,#123c6d,#061a34);
+  box-shadow:inset 0 1px rgba(255,255,255,.22),0 10px 22px rgba(0,0,0,.35);
+  transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;
+}
+.launch-button::after{content:"âº";font-size:42px;line-height:1;font-weight:400;color:#fff8df;text-align:right}
+.launch-button:hover,.launch-button:focus-visible{transform:translateY(-2px);filter:brightness(1.09);box-shadow:inset 0 1px rgba(255,255,255,.28),0 14px 28px rgba(0,0,0,.44),0 0 22px rgba(50,144,233,.2)}
+.launch-primary{color:#101010;border-color:#ffe69a;background:linear-gradient(180deg,#ffe78b 0%,#e4a824 48%,#b97508 100%);box-shadow:inset 0 2px rgba(255,255,255,.55),0 10px 28px rgba(0,0,0,.42),0 0 22px rgba(245,196,81,.28)}
+.launch-primary:hover,.launch-primary:focus-visible{box-shadow:inset 0 2px rgba(255,255,255,.6),0 14px 32px rgba(0,0,0,.46),0 0 30px rgba(245,196,81,.42)}
+.launch-button>span:last-of-type{display:block;min-width:0}
+.launch-button strong{display:block;font-size:clamp(23px,2.6vw,34px);line-height:1.02;text-transform:uppercase;letter-spacing:.015em;white-space:normal}
+.launch-button small{display:block;margin-top:6px;font-size:clamp(13px,1.5vw,17px);line-height:1.25;font-weight:600;opacity:.9}
+.launch-button-mark{position:relative;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:38px;font-weight:900;color:inherit;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25)}
+.launch-primary .launch-button-mark{background:rgba(255,255,255,.38);border-color:rgba(62,35,0,.15)}
+.player-mark::before{content:"";position:absolute;top:9px;width:17px;height:17px;border-radius:50%;background:currentColor}
+.player-mark::after{content:"";position:absolute;bottom:8px;width:31px;height:21px;border-radius:17px 17px 7px 7px;background:currentColor}
+.shield-mark::before{content:"";width:28px;height:34px;border:4px solid currentColor;clip-path:polygon(50% 0,100% 18%,90% 74%,50% 100%,10% 74%,0 18%)}
+.private-league-note{grid-area:note;text-align:center;color:#f6e7b6;font-size:clamp(13px,1.7vw,18px);font-weight:900;letter-spacing:.16em;padding:15px 0 0;border-top:1px solid rgba(245,196,81,.25)}
+
+.auth-forms-shell{
+  max-width:780px;
+  margin:24px auto 34px;
+  padding:26px;
+  border:1px solid var(--sos-line);
+  border-radius:20px;
+  color:#172033;
+  background:rgba(255,255,255,.97);
+  box-shadow:0 18px 44px rgba(0,0,0,.38);
+}
+.auth-mode-tabs .tab{flex:1;min-height:52px;font-size:18px}
+.form-heading{margin-bottom:18px}.form-heading h2{margin:5px 0 6px}.form-heading p{margin:0;color:#667085}
+.form-eyebrow{font-size:12px;font-weight:900;letter-spacing:.15em;color:#b47609}
+.primary-cta{width:100%;min-height:50px;background:linear-gradient(180deg,#d89d22,#a96f0c)}
+
+footer{
+  max-width:1180px;
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+  color:#d5dde8;
+  border-top:1px solid rgba(245,196,81,.22);
+  padding-top:18px;
+}
+footer strong{color:var(--sos-gold)}
+
+/* Logged-in screens keep the same working layout with the new brand colours. */
+#appView .panel,#commissionerPanel.panel{background:rgba(250,252,255,.97);color:#172033}
+.game-day-strip{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px;padding:11px 16px;border-radius:11px;color:#f9e6a4;background:linear-gradient(90deg,#06182f,#0d3a68);font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.summary .stat{box-shadow:0 8px 20px rgba(0,0,0,.14)}
+
+@media(max-width:900px){
+  .launch-hero{min-height:0;grid-template-columns:1fr;grid-template-areas:"crest" "copy" "actions" "note";padding:24px 20px 22px;gap:10px}
+  .sos-crest{width:min(62vw,300px)}
+  .launch-copy{align-self:center}
+  .launch-title{font-size:clamp(44px,10vw,76px)}
+  .launch-actions{width:min(100%,620px)}
+}
+@media(max-width:560px){
+  main{padding:8px}
+  .launch-auth{border-radius:18px}
+  .launch-hero{padding:20px 12px 18px}
+  .sos-crest{width:min(75vw,270px)}
+  .launch-kicker{font-size:12px;letter-spacing:.12em}
+  .launch-title{font-size:clamp(38px,12vw,59px)}
+  .launch-tagline{font-size:17px;margin-top:14px}
+  .launch-button{min-height:82px;padding:12px 14px;grid-template-columns:48px 1fr 18px;gap:10px;border-radius:13px}
+  .launch-button-mark{width:46px;height:46px;font-size:31px}
+  .launch-button strong{font-size:21px}
+  .launch-button small{font-size:12px}
+  .launch-button::after{font-size:31px}
+  .private-league-note{font-size:11px;letter-spacing:.09em}
+  .auth-forms-shell{margin:14px 8px 24px;padding:18px 14px}
+  footer{font-size:12px;padding-left:10px;padding-right:10px}
+}
