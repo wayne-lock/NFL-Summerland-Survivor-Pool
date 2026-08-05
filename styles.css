@@ -932,4 +932,55 @@ footer{
   }
 }
 
+/* =========================================================
+   Season of the Survivors v3.2 â Build 6
+   Two-column weekly game selection on tablets and desktops
+   ========================================================= */
+
+/* Display two complete matchup cards side by side on wide screens. */
+#games{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  align-items:start;
+}
+
+#games .game{
+  margin:0;
+  min-width:0;
+  height:100%;
+}
+
+/* Keep each individual game compact and easy to tap. */
+#games .game-time{
+  margin-bottom:9px;
+}
+
+#games .matchup{
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  gap:8px;
+}
+
+#games .team{
+  padding:11px;
+}
+
+#games .team button{
+  min-height:46px;
+  padding-left:8px;
+  padding-right:8px;
+}
+
+/* Use one game per row on narrower tablets and phones. */
+@media(max-width:1050px){
+  #games{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:620px){
+  #games .matchup{
+    grid-template-columns:1fr;
+  }
+}
   
