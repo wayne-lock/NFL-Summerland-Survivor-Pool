@@ -45,7 +45,10 @@ if (!configured) $("setupWarning").classList.remove("hidden");
 
 $("loginTab").onclick = () => switchAuth(true);
 $("signupTab").onclick = () => switchAuth(false);
-$("logoutBtn").onclick = () => sb.auth.signOut();
+$("logoutBtn").onclick = async () => {
+  if (!sb) return;
+  await sb.auth.signOut();
+};
 
 function switchAuth(login) {
   $("loginForm").classList.toggle("hidden", !login);
@@ -270,17 +273,53 @@ async function boot() {
   session ? await loadApp(session.user) : showAuth();
 }
 
+function setMainView(viewName) {
+  const viewIds = ["authView", "welcomeView", "appView"];
+  viewIds.forEach(id => {
+    const element = $(id);
+    if (element) element.classList.toggle("hidden", id !== viewName);
+  });
+}
+
 function showAuth() {
   me = null;
-  $("authView").classList.remove("hidden");
-  $("appView").classList.add("hidden");
-  $("logoutBtn").classList.add("hidden");
+  settings = null;
+  games = [];
+  usedTeams = [];
+  currentPick = null;
+
+  setMainView("authView");
+  $("logoutBtn")?.classList.add("hidden");
+
+  const formsShell = document.querySelector(".auth-forms-shell");
+  if (formsShell) formsShell.classList.add("hidden");
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showWelcomePage() {
+  if (!me || me.is_admin) {
+    showPickPage();
+    return;
+  }
+
+  renderWelcomePage();
+  setMainView("welcomeView");
+  $("logoutBtn")?.classList.add("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showPickPage() {
+  setMainView("appView");
+  $("logoutBtn")?.classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 async function loadApp(user) {
-  $("authView").classList.add("hidden");
-  $("appView").classList.remove("hidden");
-  $("logoutBtn").classList.remove("hidden");
+  $("authView")?.classList.add("hidden");
+  $("welcomeView")?.classList.add("hidden");
+  $("appView")?.classList.add("hidden");
+  $("logoutBtn")?.classList.add("hidden");
 
   const { data: profile, error } = await sb
     .from("profiles")
@@ -319,8 +358,131 @@ async function loadApp(user) {
 
   $("commissionerPanel").classList.toggle("hidden", !me.is_admin);
 
-  if (me.is_admin) setupCommissioner();
+  if (me.is_admin) {
+    setupCommissioner();
+    showPickPage();
+  } else {
+    showWelcomePage();
+  }
 }
+
+function formatWelcomeDate(value) {
+  if (!value) return "";
+  return new Date(value).toLocaleDateString([], {
+    weekday: "long",
+    month: "short",
+    day: "numeric"
+  });
+}
+
+function formatWelcomeTime(value) {
+  if (!value) return "";
+  return new Date(value).toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short"
+  });
+}
+
+function getNextAvailableKickoff() {
+  const now = Date.now();
+  return games
+    .map(game => new Date(game.date))
+    .filter(date => !Number.isNaN(date.getTime()) && date.getTime() > now)
+    .sort((a, b) => a - b)[0] || null;
+}
+
+function renderWelcomePage(myPicks = null) {
+  if (!me || !settings || !$("welcomeView")) return;
+
+  const losses = Number(me.losses || 0);
+  const mulligans = Math.max(0, 2 - losses);
+  const pickHistory = Array.isArray(myPicks) ? myPicks : [];
+  const wins = pickHistory.filter(pick => pick.result === "win").length;
+
+  $("welcomeAvatar").textContent = me.avatar || "SOS";
+  $("welcomePlayerName").textContent = me.nickname || "Survivor";
+  $("welcomeRealName").textContent =
+    `${me.first_name || ""} ${me.last_name || ""}`.trim() || "Ready for game day";
+  $("welcomeWins").textContent = wins;
+  $("welcomeMulligans").textContent = mulligans;
+  $("welcomeLosses").textContent = losses;
+
+  const week = Number(settings.current_week || 1);
+  const nextKickoff = getNextAvailableKickoff();
+  const locked = isCurrentPickLocked() || settings.picks_open === false;
+
+  if (currentPick && locked) {
+    $("welcomeWeekStatus").textContent = `YOUR WEEK ${week} PICK IS LOCKED IN`;
+    $("welcomeWeekMessage").textContent = `${currentPick.team_name} selected. Good luck this week!`;
+    $("enterPickPageBtn").textContent = "VIEW MY PICK";
+  } else if (currentPick) {
+    $("welcomeWeekStatus").textContent = `YOUR WEEK ${week} PICK IS READY`;
+    $("welcomeWeekMessage").textContent =
+      `${currentPick.team_name} selected. You may change it before kickoff.`;
+    $("enterPickPageBtn").textContent = "VIEW OR CHANGE PICK";
+  } else if (settings.picks_open === false) {
+    $("welcomeWeekStatus").textContent = `WEEK ${week} PICKS ARE CLOSED`;
+    $("welcomeWeekMessage").textContent = "The Commissioner has temporarily locked all selections.";
+    $("enterPickPageBtn").textContent = "VIEW MATCHUPS";
+  } else if (nextKickoff) {
+    $("welcomeWeekStatus").textContent =
+      `WEEK ${week} OPENS ${formatWelcomeDate(nextKickoff).toUpperCase()}`;
+    $("welcomeWeekMessage").textContent =
+      `${formatWelcomeTime(nextKickoff)} - Your next chance to survive starts here.`;
+    $("enterPickPageBtn").textContent = "MAKE OR CHANGE PICK";
+  } else {
+    $("welcomeWeekStatus").textContent = `WEEK ${week} IS NOW OPEN`;
+    $("welcomeWeekMessage").textContent = "Choose one unused team to survive this week.";
+    $("enterPickPageBtn").textContent = "MAKE OR CHANGE PICK";
+  }
+
+  const deadlineSource =
+    currentPick?.game_kickoff ||
+    nextKickoff?.toISOString?.() ||
+    games.map(game => game.date).filter(Boolean).sort()[0] ||
+    null;
+  const deadline = deadlineSource ? getPickLockTime(deadlineSource) : null;
+
+  $("welcomeDeadlineDate").textContent =
+    deadline ? formatWelcomeDate(deadline) : "Schedule not available yet";
+  $("welcomeDeadlineTime").textContent =
+    deadline ? formatWelcomeTime(deadline) : "";
+}
+
+function bindWelcomePageControls() {
+  $("enterPickPageBtn")?.addEventListener("click", showPickPage);
+
+  $("welcomeHistoryBtn")?.addEventListener("click", () => {
+    showPickPage();
+    $("currentPickCard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  $("welcomeLeaderboardBtn")?.addEventListener("click", () => {
+    showPickPage();
+    $("activeSurvivors")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  $("welcomeLockerBtn")?.addEventListener("click", () => {
+    showPickPage();
+    $("identity")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  $("welcomeHowToPlayBtn")?.addEventListener("click", () => {
+    alert(
+      "Pick one team to win each week.\n\n" +
+      "You cannot use the same team twice.\n\n" +
+      "Two losses use your two mulligans. A third loss moves you to the bench."
+    );
+  });
+
+  $("welcomeSignOutBtn")?.addEventListener("click", async () => {
+    if (!sb) return;
+    await sb.auth.signOut();
+  });
+}
+
+bindWelcomePageControls();
 
 function renderIdentity() {
   const status = me.eliminated ? "On the Bench" : "Still in the Game";
@@ -446,6 +608,7 @@ async function loadSharedData() {
   usedTeams = (myPicks || []).map(item => item.team_abbr);
   currentPick = (myPicks || []).find(item => item.week === settings.current_week) || null;
   renderCurrentPickCard();
+  renderWelcomePage(myPicks || []);
 
   if (me.is_admin) {
     $("commissionerSeason").textContent = settings.season;
@@ -627,6 +790,7 @@ async function loadSchedule() {
 
     await syncWeeklyGamesForSafeguard();
     renderGames();
+    renderWelcomePage();
 
     msg(
       "pickStatus",
@@ -735,6 +899,7 @@ window.makePick = async (abbr, name, gameId, gameKickoff) => {
 
   await loadSharedData();
   renderGames();
+  renderWelcomePage();
 };
 
 
