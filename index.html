@@ -78,24 +78,25 @@
       </div>
 
       <div class="launch-actions" aria-label="Pool access options">
-        <button type="button" class="launch-button launch-primary" onclick="document.getElementById('signupTab').click(); document.getElementById('firstName').focus();">
+        <button type="button" class="launch-button launch-primary" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('signupTab').click(); document.getElementById('firstName').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});">
           <span class="launch-button-mark" aria-hidden="true">+</span>
           <span><strong>Join the Pool</strong><small>Create your Player Identity</small></span>
         </button>
-        <button type="button" class="launch-button launch-secondary" onclick="document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus();">
+        <button type="button" class="launch-button launch-secondary" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});">
           <span class="launch-button-mark player-mark" aria-hidden="true"></span>
           <span><strong>Player Sign In</strong><small>Return to My Locker</small></span>
         </button>
-        <button type="button" class="launch-button launch-secondary" onclick="document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus();">
+        <button type="button" class="launch-button launch-secondary" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});">
           <span class="launch-button-mark shield-mark" aria-hidden="true"></span>
           <span><strong>Commissioner Sign In</strong><small>Open the Command Centre</small></span>
         </button>
       </div>
 
-      <div class="private-league-note">PRIVATE LEAGUE &bull; BY INVITATION</div>
+      <div class="private-league-note">PRIVATE LEAGUE - BY INVITATION</div>
     </div>
 
-    <div class="auth-forms-shell">
+    <div class="auth-forms-shell hidden">
+      <button type="button" class="auth-back-button" onclick="document.querySelector('.auth-forms-shell').classList.add('hidden'); document.querySelector('.launch-hero').scrollIntoView({behavior:'smooth',block:'start'});">Back to Opening Page</button>
       <div class="tabs auth-mode-tabs">
         <button id="loginTab" class="tab active">Sign In</button>
         <button id="signupTab" class="tab">Join the Pool</button>
@@ -333,3 +334,4 @@
 <script src="app.js"></script>
 </body>
 </html>
+
