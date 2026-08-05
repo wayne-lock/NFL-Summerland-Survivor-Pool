@@ -699,3 +699,116 @@ footer strong{color:var(--sos-gold)}
   .auth-forms-shell{margin:14px 8px 24px;padding:18px 14px}
   footer{font-size:12px;padding-left:10px;padding-right:10px}
 }
+
+/* =========================================================
+   Version 3.2 Build 3 - final landing-page polish
+   HTML-safe chevrons, clean separators, and iPad fit
+   ========================================================= */
+
+/* Remove decorative rules that appeared as bright white lines. */
+.stadium-scene::after,
+.launch-hero::after,
+.private-league-note,
+footer {
+  border-top: 0;
+  border-bottom: 0;
+}
+
+/* Keep the field/crowd atmosphere without horizontal rule edges. */
+.stadium-scene::after {
+  background:
+    radial-gradient(circle at 2% 50%,rgba(255,255,255,.55) 0 1px,transparent 2px) 0 0/9px 7px,
+    linear-gradient(180deg,rgba(5,11,20,.36),rgba(2,7,14,.82));
+}
+
+/* Replace the text chevron with a CSS-drawn chevron.
+   This avoids corrupted characters on some iPad/browser combinations. */
+.launch-button::after {
+  content:"";
+  width:15px;
+  height:15px;
+  justify-self:end;
+  border-top:4px solid currentColor;
+  border-right:4px solid currentColor;
+  transform:rotate(45deg);
+  color:#fff8df;
+  opacity:.95;
+}
+
+/* Final proportional adjustments for landscape iPad screens. */
+.launch-hero {
+  min-height:650px;
+  grid-template-columns:minmax(205px,.72fr) minmax(430px,1.72fr);
+  gap:14px 34px;
+  padding:30px 38px 24px;
+}
+.sos-crest {
+  width:min(100%,315px);
+}
+.sos-crest-svg {
+  max-height:420px;
+}
+.launch-title {
+  font-size:clamp(44px,5.7vw,78px);
+  line-height:.92;
+  letter-spacing:.018em;
+}
+.launch-tagline {
+  margin-top:15px;
+  font-size:clamp(17px,2vw,24px);
+}
+.launch-actions {
+  gap:13px;
+}
+.launch-button {
+  min-height:96px;
+  padding:16px 22px;
+}
+.private-league-note {
+  padding-top:12px;
+}
+
+/* The auth form begins as a clearly separate card, without a rule line. */
+.auth-forms-shell {
+  margin-top:30px;
+}
+
+@media (max-width:1100px) and (min-width:901px) {
+  .launch-hero {
+    min-height:610px;
+    grid-template-columns:minmax(195px,.68fr) minmax(410px,1.75fr);
+    gap:12px 26px;
+    padding:26px 28px 22px;
+  }
+  .sos-crest { width:min(100%,285px); }
+  .sos-crest-svg { max-height:385px; }
+  .launch-title { font-size:clamp(42px,5.6vw,68px); }
+  .launch-button strong { font-size:clamp(22px,2.4vw,30px); }
+}
+
+@media (max-width:900px) {
+  .launch-hero {
+    min-height:0;
+    grid-template-columns:1fr;
+    grid-template-areas:"crest" "copy" "actions" "note";
+    padding:22px 18px 20px;
+    gap:9px;
+  }
+  .sos-crest { width:min(52vw,260px); }
+  .launch-title { font-size:clamp(40px,8.3vw,66px); }
+  .launch-button { min-height:90px; }
+}
+
+@media (max-width:560px) {
+  .sos-crest { width:min(68vw,235px); }
+  .launch-title { font-size:clamp(35px,10.8vw,52px); }
+  .launch-button {
+    min-height:84px;
+    grid-template-columns:48px 1fr 18px;
+  }
+  .launch-button::after {
+    width:12px;
+    height:12px;
+    border-width:3px;
+  }
+}
