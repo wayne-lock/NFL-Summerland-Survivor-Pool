@@ -144,6 +144,83 @@
       <p id="authMessage" class="message"></p>
     </div>
   </section>
+
+  <section id="welcomeView" class="welcome-view hidden" aria-labelledby="welcomeTitle">
+    <div class="welcome-stadium" aria-hidden="true">
+      <div class="welcome-light welcome-light-left"></div>
+      <div class="welcome-light welcome-light-right"></div>
+      <div class="welcome-field"></div>
+    </div>
+
+    <div class="welcome-shell">
+      <div class="welcome-hero">
+        <div class="welcome-crest" aria-hidden="true">
+          <div class="welcome-crest-stars">* * *</div>
+          <div class="welcome-crest-sos">SOS</div>
+          <div class="welcome-crest-ribbon">SEASON OF THE</div>
+          <div class="welcome-crest-name">SURVIVORS</div>
+          <div class="welcome-crest-football"></div>
+        </div>
+
+        <div class="welcome-challenge">
+          <div>ONLY ONE WILL SURVIVE</div>
+          <strong>WHO WILL IT BE?</strong>
+        </div>
+
+        <div class="welcome-rules" aria-label="Pool rules">
+          <div><strong>PICK ONE TEAM</strong><span>Each week</span></div>
+          <div><strong>NO REPEATS</strong><span>Every team is one and done</span></div>
+          <div><strong>OUTLAST THE REST</strong><span>Be the last survivor standing</span></div>
+        </div>
+      </div>
+
+      <aside class="welcome-dashboard">
+        <section class="welcome-player-card">
+          <div class="welcome-eyebrow">WELCOME BACK!</div>
+          <div class="welcome-player-row">
+            <div id="welcomeAvatar" class="welcome-avatar">SOS</div>
+            <div>
+              <h2 id="welcomePlayerName">Survivor</h2>
+              <p id="welcomeRealName">Ready for game day</p>
+            </div>
+          </div>
+          <div class="welcome-player-stats">
+            <div><strong id="welcomeWins">0</strong><span>WINS</span></div>
+            <div><strong id="welcomeMulligans">2</strong><span>MULLIGANS</span></div>
+            <div><strong id="welcomeLosses">0</strong><span>LOSSES</span></div>
+          </div>
+        </section>
+
+        <section class="welcome-pick-card">
+          <div class="welcome-pick-icon" aria-hidden="true"></div>
+          <div class="welcome-pick-copy">
+            <h2 id="welcomeWeekStatus">WEEK 1 OPENS SOON</h2>
+            <p id="welcomeWeekMessage">Your next chance to survive starts here.</p>
+          </div>
+          <button id="enterPickPageBtn" type="button">MAKE OR CHANGE PICK</button>
+        </section>
+
+        <section class="welcome-deadline-card">
+          <div class="welcome-eyebrow">NEXT PICK DEADLINE</div>
+          <strong id="welcomeDeadlineDate">Schedule loading...</strong>
+          <span id="welcomeDeadlineTime"></span>
+          <p>Make sure to get your pick in on time.</p>
+        </section>
+
+        <button id="welcomeHistoryBtn" type="button" class="welcome-history-button">
+          VIEW PICK HISTORY
+        </button>
+      </aside>
+    </div>
+
+    <nav class="welcome-nav" aria-label="Player navigation">
+      <button id="welcomeHowToPlayBtn" type="button">HOW TO PLAY</button>
+      <button id="welcomeLeaderboardBtn" type="button">LEADERBOARD</button>
+      <button id="welcomeLockerBtn" type="button">MY LOCKER</button>
+      <button id="welcomeSignOutBtn" type="button">SIGN OUT</button>
+    </nav>
+  </section>
+
   <section id="appView" class="hidden">
     <div class="game-day-strip"><span>GAME DAY CONTROL</span><strong>Season of the Survivors</strong></div>
     <div class="summary">
@@ -328,10 +405,9 @@
   </section>
 </main>
 
-<footer><strong>Season of the Survivors</strong><span>Version 3.2 Launch Edition &bull; Private League by Invitation</span></footer>
+<footer><strong>Season of the Survivors</strong><span>Version 3.3 Welcome Edition &bull; Private League by Invitation</span></footer>
 
 <script src="config.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
-
