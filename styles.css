@@ -812,3 +812,124 @@ footer {
     border-width:3px;
   }
 }
+
+/* =========================================================
+   Season of the Survivors v3.2 â Build 5
+   Wider pick centre and final landing-page refinement
+   ========================================================= */
+
+/* Use more of the available iPad landscape width. */
+main,
+.hero-header,
+footer{
+  max-width:1440px;
+}
+
+/* Give the weekly pick centre priority over the survivor list. */
+#appView .layout{
+  grid-template-columns:minmax(0,1.75fr) minmax(300px,.72fr);
+  align-items:start;
+}
+
+#appView .layout > .panel:first-child{
+  min-width:0;
+}
+
+#appView .layout > .panel:last-child{
+  min-width:0;
+}
+
+/* Use the full pick panel and keep matchup cards balanced. */
+#games{
+  width:100%;
+}
+
+#games .game{
+  width:100%;
+}
+
+#games .matchup{
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+}
+
+#games .team{
+  min-width:0;
+}
+
+#games .team button{
+  min-height:48px;
+}
+
+/* Final opening-page proportions. */
+.launch-hero{
+  min-height:690px;
+  grid-template-columns:minmax(225px,.78fr) minmax(480px,1.72fr);
+  padding:34px 44px 28px;
+}
+
+.sos-crest{
+  width:min(100%,325px);
+}
+
+.launch-title{
+  font-size:clamp(46px,6.1vw,82px);
+  line-height:.92;
+}
+
+.launch-actions{
+  width:min(100%,650px);
+}
+
+.launch-button{
+  min-height:98px;
+}
+
+/* Keep all decorative separators subtle rather than white. */
+.launch-hero hr,
+.launch-auth hr,
+#appView hr{
+  border:0;
+  border-top:1px solid rgba(245,196,81,.2);
+}
+
+/* Prefer native colour emoji fonts where symbols are intentionally used. */
+.avatar,
+.mini-avatar,
+.avatar-choice,
+.action-icon,
+.launch-button-mark{
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+}
+
+@media(max-width:1100px){
+  #appView .layout{
+    grid-template-columns:minmax(0,1.45fr) minmax(290px,.8fr);
+  }
+  .launch-hero{
+    grid-template-columns:minmax(200px,.72fr) minmax(430px,1.55fr);
+    gap:16px 28px;
+  }
+}
+
+@media(max-width:820px){
+  #appView .layout{
+    grid-template-columns:1fr;
+  }
+  .launch-hero{
+    min-height:auto;
+    grid-template-columns:1fr;
+    grid-template-areas:"crest" "copy" "actions" "note";
+    padding:26px 20px 24px;
+  }
+  .sos-crest{
+    width:min(72vw,260px);
+  }
+  .launch-copy{
+    align-self:auto;
+  }
+  .launch-title{
+    font-size:clamp(43px,10vw,68px);
+  }
+}
+
+  
