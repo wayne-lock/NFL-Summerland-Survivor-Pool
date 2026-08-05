@@ -1243,4 +1243,362 @@ footer{
   }
 }
 
+
+/* =========================================================
+   VERSION 3.2 BUILD 8 â APPROVED GAME-DAY PICK DESIGN
+   Visual-only update. One-tap pick saving remains unchanged.
+   ========================================================= */
+
+/* Pick page becomes one full-width game-day surface. */
+#appView .layout{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+  align-items:start;
+}
+
+#appView .layout > .panel:first-child{
+  width:100%;
+  padding:22px;
+  overflow:hidden;
+  color:#f5f8fc;
+  border:1px solid rgba(218,171,52,.42);
+  background:
+    radial-gradient(circle at 82% 5%,rgba(27,93,135,.34),transparent 29%),
+    radial-gradient(circle at 12% 0%,rgba(219,171,49,.14),transparent 25%),
+    linear-gradient(145deg,#061425 0%,#071d34 52%,#04111f 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 18px 40px rgba(0,12,29,.32);
+}
+
+/* Survivor and bench information moves below the games as a compact strip. */
+#appView .layout > .panel:last-child{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px 22px;
+  width:100%;
+  padding:14px 18px;
+  border:1px solid rgba(218,171,52,.30);
+  background:linear-gradient(135deg,rgba(7,27,48,.98),rgba(11,43,70,.97));
+  color:#eef5fb;
+}
+
+#appView .layout > .panel:last-child h2{
+  margin:0 0 8px;
+  color:#e5b943;
+  font-size:1rem;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+}
+
+#appView .layout > .panel:last-child .survivor-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+#appView .layout > .panel:last-child .survivor{
+  flex:1 1 190px;
+  min-width:180px;
+  padding:8px 10px;
+  border:1px solid rgba(147,180,204,.28);
+  border-radius:9px;
+  background:rgba(255,255,255,.055);
+  box-shadow:none;
+  color:#eef5fb;
+}
+
+/* Player identity becomes a compact broadcast header. */
+#identity{
+  margin-bottom:12px;
+  padding:11px 14px;
+  border:1px solid rgba(218,171,52,.30);
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+}
+
+#identity h2,
+#identity h3,
+#identity strong{
+  color:#fff;
+}
+
+#identity .small{
+  color:#b9ccda;
+}
+
+/* Current selection mirrors the approved dark-blue confirmation panel. */
+#currentPickCard{
+  margin:0 0 17px;
+  padding:15px 19px;
+  color:#fff;
+  border:1px solid rgba(225,181,64,.70);
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 88% 50%,rgba(27,157,131,.23),transparent 31%),
+    linear-gradient(112deg,#092e54,#0d4d70 64%,#0b6659);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 9px 22px rgba(0,0,0,.24);
+}
+
+#currentPickCard .current-pick-heading{
+  color:#f3cf68;
+  letter-spacing:.075em;
+}
+
+#currentPickCard .pick-card-team{
+  color:#fff;
+  text-shadow:0 2px 10px rgba(0,0,0,.34);
+}
+
+#currentPickCard .pick-card-details{
+  color:#d8e6ef;
+}
+
+#currentPickCard .pick-card-countdown{
+  color:#f1cf65;
+}
+
+/* Stronger weekly heading. */
+#playerPanel h2{
+  margin:18px 0 12px;
+  color:#f3c64e;
+  text-transform:uppercase;
+  letter-spacing:.065em;
+  text-shadow:0 2px 10px rgba(0,0,0,.32);
+}
+
+/* Saved/status message appears as a compact gold instruction strip. */
+#pickStatus{
+  color:#f1d26f;
+}
+
+#pickStatus:not(:empty){
+  color:#0c3628;
+  border:1px solid #d9b64f;
+  background:linear-gradient(180deg,#fff7d4,#f2df91);
+}
+
+/* Approved two-column matchup presentation. */
+#games{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px 16px;
+}
+
+#games .game{
+  padding:0;
+  overflow:hidden;
+  color:#f6f8fb;
+  border:1px solid rgba(164,190,210,.54);
+  border-radius:13px;
+  background:
+    linear-gradient(105deg,rgba(79,7,18,.72),rgba(7,29,52,.96) 42%,rgba(7,37,65,.97) 58%,rgba(8,38,67,.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 10px 22px rgba(0,7,19,.28);
+}
+
+#games .game:nth-child(2n){
+  background:
+    linear-gradient(105deg,rgba(43,13,75,.72),rgba(7,29,52,.96) 42%,rgba(53,17,9,.65));
+}
+
+#games .game:nth-child(3n){
+  background:
+    linear-gradient(105deg,rgba(49,72,13,.62),rgba(7,29,52,.96) 42%,rgba(5,71,103,.76));
+}
+
+#games .game-time{
+  margin:0;
+  width:100%;
+  padding:7px 10px;
+  color:#e7c76f;
+  border:0;
+  border-bottom:1px solid rgba(182,204,220,.24);
+  border-radius:0;
+  background:rgba(1,12,24,.40);
+  font-size:.73rem;
+  letter-spacing:.035em;
+}
+
+/* Each side fills half the card; AT remains in the centre. */
+#games .matchup{
+  grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr);
+  gap:0;
+  min-height:126px;
+}
+
+#games .at{
+  position:relative;
+  min-height:100%;
+  color:#f2f5f8;
+  border-left:1px solid rgba(174,198,216,.40);
+  border-right:1px solid rgba(174,198,216,.40);
+  background:rgba(1,13,27,.36);
+  font-size:.75rem;
+  font-weight:900;
+}
+
+#games .at::before{
+  content:"";
+  position:absolute;
+  width:34px;
+  height:34px;
+  border:1px solid rgba(195,215,230,.48);
+  border-radius:50%;
+}
+
+#games .team{
+  min-height:126px;
+  padding:14px 12px 11px;
+  color:#f7f9fb;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+
+#games .team b{
+  color:#fff;
+  font-size:clamp(1rem,1.7vw,1.22rem);
+  line-height:1.08;
+  text-transform:uppercase;
+  text-shadow:0 2px 9px rgba(0,0,0,.38);
+}
+
+#games .team .where{
+  color:#a9bfd0;
+  font-size:.66rem;
+}
+
+#games .team button{
+  min-height:43px;
+  color:#eef5fb;
+  border:1px solid rgba(173,201,222,.48);
+  border-radius:8px;
+  background:linear-gradient(180deg,#174a75,#0e3458);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09);
+}
+
+#games .team:not(.selected):not(.used):hover{
+  border-color:transparent;
+  background:rgba(255,255,255,.045);
+  box-shadow:inset 0 0 0 2px rgba(229,188,70,.35);
+}
+
+/* Selected team receives the approved gold broadcast highlight. */
+#games .team.selected{
+  transform:none;
+  color:#09182b;
+  border:0;
+  background:
+    radial-gradient(circle at 85% 15%,rgba(255,255,255,.36),transparent 25%),
+    linear-gradient(145deg,#f9dc79,#d49a17);
+  box-shadow:
+    inset 0 0 0 3px #f3cf63,
+    inset 0 0 0 5px rgba(72,46,0,.26),
+    0 0 18px rgba(230,184,51,.40);
+}
+
+#games .team.selected b,
+#games .team.selected .where{
+  color:#08182c;
+  text-shadow:none;
+}
+
+#games .team.selected button{
+  color:#09182b;
+  border-color:#7f5700;
+  background:rgba(255,255,255,.46);
+}
+
+#games .team.selected::after{
+  top:9px;
+  right:9px;
+  background:#071a31;
+}
+
+#games .team.selected::before{
+  top:14px;
+  right:15px;
+  border-color:#f2cc61;
+}
+
+/* Opponent fades, but remains readable and selectable. */
+#games .matchup:has(.team.selected) .team:not(.selected){
+  opacity:.56;
+  filter:saturate(.55);
+}
+
+/* Remove excessive empty bench footprint. */
+#appView .layout > .panel:last-child .bench-heading{
+  margin-top:0;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+
+#benchSurvivors:empty::after{
+  content:"Bench empty";
+  display:block;
+  color:#9bb0c0;
+  font-size:.82rem;
+}
+
+#activeSurvivors:empty::after{
+  content:"No active players";
+  display:block;
+  color:#9bb0c0;
+  font-size:.82rem;
+}
+
+/* Tablet: preserve the two-column game layout with tighter typography. */
+@media(max-width:1050px){
+  #appView .layout > .panel:first-child{
+    padding:16px;
+  }
+
+  #games{
+    gap:12px;
+  }
+
+  #games .matchup{
+    min-height:116px;
+  }
+
+  #games .team{
+    min-height:116px;
+    padding:12px 9px 10px;
+  }
+}
+
+/* Phones and portrait tablets: one matchup per row. */
+@media(max-width:760px){
+  #games{
+    grid-template-columns:1fr;
+  }
+
+  #appView .layout > .panel:last-child{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:480px){
+  #games .matchup{
+    grid-template-columns:1fr;
+  }
+
+  #games .at{
+    min-height:31px;
+    border:0;
+    border-top:1px solid rgba(174,198,216,.28);
+    border-bottom:1px solid rgba(174,198,216,.28);
+  }
+
+  #games .at::before{
+    display:none;
+  }
+}
+
   
