@@ -32,53 +32,117 @@
     <p>The website is not connected to Supabase.</p>
   </section>
 
-  <section id="authView" class="panel auth">
-    <div class="auth-intro">
-      <div class="auth-kicker">WELCOME TO GAME DAY</div>
-      <h2>One pick can keep you alive.</h2>
-      <p>Choose one NFL winner each week. Two mulligans keep you in the game. A third loss sends you to the bench.</p>
+  <section id="authView" class="panel auth launch-auth">
+    <div class="launch-hero">
+      <div class="sos-crest" aria-label="Season of the Survivors logo">
+        <svg class="sos-crest-svg" viewBox="0 0 320 360" role="img" aria-labelledby="sosLogoTitle sosLogoDesc">
+          <title id="sosLogoTitle">SOS Season of the Survivors</title>
+          <desc id="sosLogoDesc">An original shield with stars, SOS lettering, a football and championship laurels.</desc>
+          <defs>
+            <linearGradient id="shieldMetal" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f7d36a"/>
+              <stop offset="0.45" stop-color="#9c6b13"/>
+              <stop offset="1" stop-color="#f6e29b"/>
+            </linearGradient>
+            <linearGradient id="silverText" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffffff"/>
+              <stop offset="0.5" stop-color="#b9c4d1"/>
+              <stop offset="1" stop-color="#6d7886"/>
+            </linearGradient>
+          </defs>
+          <path d="M160 12 L287 58 L270 222 Q252 302 160 344 Q68 302 50 222 L33 58 Z" fill="#07152b" stroke="url(#shieldMetal)" stroke-width="12"/>
+          <path d="M160 29 L268 68 L253 215 Q237 281 160 321 Q83 281 67 215 L52 68 Z" fill="#0b2445" stroke="#d4dde8" stroke-width="3" opacity="0.96"/>
+          <g fill="#f5c94a" stroke="#fff2b2" stroke-width="1.2">
+            <path d="M74 60l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z"/>
+            <path d="M116 43l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z"/>
+            <path d="M160 35l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z"/>
+            <path d="M204 43l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z"/>
+            <path d="M246 60l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z"/>
+          </g>
+          <text x="160" y="160" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="92" letter-spacing="-5" fill="url(#silverText)" stroke="#101722" stroke-width="4">SOS</text>
+          <path d="M46 170 Q160 145 274 170 L260 225 Q160 205 60 225 Z" fill="#b9851f" stroke="#f6d56b" stroke-width="4"/>
+          <text x="160" y="192" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="16" fill="#07152b">SEASON OF THE</text>
+          <text x="160" y="214" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="19" fill="#07152b">SURVIVORS</text>
+          <g transform="translate(160 258) rotate(-8)">
+            <ellipse rx="58" ry="34" fill="#7a3d18" stroke="#f1c66b" stroke-width="4"/>
+            <path d="M-13 -3 L15 -3 M-9 -10 L-9 5 M0 -11 L0 5 M9 -10 L9 4" stroke="#f8eee0" stroke-width="4" stroke-linecap="round"/>
+          </g>
+          <path d="M75 278 Q52 254 62 223 M82 287 Q54 280 43 253 M245 278 Q268 254 258 223 M238 287 Q266 280 277 253" fill="none" stroke="#d7a82c" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="launch-copy">
+        <div class="launch-kicker">SUMMERLAND NFL SURVIVOR POOL</div>
+        <h2 class="launch-title">Season of the Survivors</h2>
+        <p class="launch-tagline">One Winning Pick. Every Week.<br>Last Survivor Standing.</p>
+      </div>
+
+      <div class="launch-actions" aria-label="Pool access options">
+        <button type="button" class="launch-button launch-primary" onclick="document.getElementById('signupTab').click(); document.getElementById('firstName').focus();">
+          <span class="launch-button-mark" aria-hidden="true">+</span>
+          <span><strong>Join the Pool</strong><small>Create your Player Identity</small></span>
+        </button>
+        <button type="button" class="launch-button launch-secondary" onclick="document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus();">
+          <span class="launch-button-mark player-mark" aria-hidden="true"></span>
+          <span><strong>Player Sign In</strong><small>Return to My Locker</small></span>
+        </button>
+        <button type="button" class="launch-button launch-secondary" onclick="document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus();">
+          <span class="launch-button-mark shield-mark" aria-hidden="true"></span>
+          <span><strong>Commissioner Sign In</strong><small>Open the Command Centre</small></span>
+        </button>
+      </div>
+
+      <div class="private-league-note">PRIVATE LEAGUE &bull; BY INVITATION</div>
     </div>
 
-    <div class="tabs">
-      <button id="loginTab" class="tab active">Player / Commissioner Sign In</button>
-      <button id="signupTab" class="tab">Join the Pool</button>
+    <div class="auth-forms-shell">
+      <div class="tabs auth-mode-tabs">
+        <button id="loginTab" class="tab active">Sign In</button>
+        <button id="signupTab" class="tab">Join the Pool</button>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-heading">
+          <div class="form-eyebrow">WELCOME BACK</div>
+          <h2>Player or Commissioner Sign In</h2>
+          <p>Enter your email and password to continue.</p>
+        </div>
+        <label>Email</label>
+        <input id="loginEmail" type="email" required autocomplete="email">
+        <label>Password</label>
+        <input id="loginPassword" type="password" minlength="6" required autocomplete="current-password">
+        <button type="submit">Sign In</button>
+      </form>
+
+      <form id="signupForm" class="hidden">
+        <div class="form-heading">
+          <div class="form-eyebrow">WELCOME TO THE LOCKER ROOM</div>
+          <h2>Create Your Player Identity</h2>
+          <p>Choose your Player Name and avatar, then enter this season's competition.</p>
+        </div>
+        <label>First name</label>
+        <input id="firstName" required maxlength="30" autocomplete="given-name">
+        <label>Last name</label>
+        <input id="lastName" required maxlength="40" autocomplete="family-name">
+        <label>Player Name</label>
+        <input id="playerName" required maxlength="20" autocomplete="off" placeholder="Example: Sunday Sniper">
+        <div id="playerNameStatus" class="player-name-status"></div>
+        <label>Choose Your Avatar</label>
+        <div id="signupAvatarPicker" class="avatar-picker" aria-label="Choose your avatar"></div>
+        <input id="selectedAvatar" type="hidden" value="ð">
+        <label>Email</label>
+        <input id="signupEmail" type="email" required autocomplete="email">
+        <label>Password</label>
+        <input id="signupPassword" type="password" minlength="6" required autocomplete="new-password">
+        <label>Pool code</label>
+        <input id="poolCode" required placeholder="Provided by the Commissioner">
+        <button type="submit" class="primary-cta">Create My Entry</button>
+        <p class="small">Your Player Name is public. Your real name is visible only in the Commissioner view.</p>
+      </form>
+
+      <p id="authMessage" class="message"></p>
     </div>
-
-    <form id="loginForm">
-      <h2>Welcome Back</h2>
-      <label>Email</label>
-      <input id="loginEmail" type="email" required>
-      <label>Password</label>
-      <input id="loginPassword" type="password" minlength="6" required>
-      <button type="submit">Sign In</button>
-    </form>
-
-    <form id="signupForm" class="hidden">
-      <h2>Welcome to the Locker Room</h2>
-      <p class="form-intro">Create your Player Identity and enter this season's competition.</p>
-      <label>First name</label>
-      <input id="firstName" required maxlength="30">
-      <label>Last name</label>
-      <input id="lastName" required maxlength="40">
-      <label>Player Name</label>
-      <input id="playerName" required maxlength="20" autocomplete="off" placeholder="Example: Sunday Sniper">
-      <div id="playerNameStatus" class="player-name-status">Choose the name other players will see.</div>
-      <label>Choose Your Avatar</label>
-      <div id="signupAvatarPicker" class="avatar-picker" aria-label="Choose your avatar"></div>
-      <input id="selectedAvatar" type="hidden" value="ð">
-      <label>Email</label>
-      <input id="signupEmail" type="email" required>
-      <label>Password</label>
-      <input id="signupPassword" type="password" minlength="6" required>
-      <label>Pool code</label>
-      <input id="poolCode" required placeholder="Provided by the Commissioner">
-      <button type="submit" class="primary-cta">Create My Entry</button>
-      <p class="small">Your Player Name is public. Your real name is visible only in the Commissioner view.</p>
-    </form>
-
-    <p id="authMessage" class="message"></p>
   </section>
-
   <section id="appView" class="hidden">
     <div class="game-day-strip"><span>GAME DAY CONTROL</span><strong>Season of the Survivors</strong></div>
     <div class="summary">
@@ -263,7 +327,7 @@
   </section>
 </main>
 
-<footer><strong>One Pick. Every Week.</strong><span>Survive another week.</span></footer>
+<footer><strong>Season of the Survivors</strong><span>Version 3.2 Launch Edition &bull; Private League by Invitation</span></footer>
 
 <script src="config.js"></script>
 <script src="app.js"></script>
