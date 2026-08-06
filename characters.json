@@ -1,0 +1,162 @@
+[
+  {
+    "id": "clutch-chris",
+    "name": "Clutch Chris",
+    "group": "men",
+    "skin": "#D9A06C",
+    "hair": "#3A241B",
+    "clothing": "#123A63",
+    "accent": "#D5A62A",
+    "style": "jersey"
+  },
+  {
+    "id": "sunday-sniper",
+    "name": "Sunday Sniper",
+    "group": "men",
+    "skin": "#B97850",
+    "hair": "#151515",
+    "clothing": "#17191D",
+    "accent": "#D6AE42",
+    "style": "hoodie"
+  },
+  {
+    "id": "gridiron-gary",
+    "name": "Gridiron Gary",
+    "group": "men",
+    "skin": "#E0AE7A",
+    "hair": "#6A3922",
+    "clothing": "#263E58",
+    "accent": "#E0B440",
+    "style": "varsity"
+  },
+  {
+    "id": "the-general",
+    "name": "The General",
+    "group": "men",
+    "skin": "#9E6448",
+    "hair": "#27211D",
+    "clothing": "#2C2F33",
+    "accent": "#D0A43A",
+    "style": "coach"
+  },
+  {
+    "id": "ice-man",
+    "name": "Ice Man",
+    "group": "men",
+    "skin": "#F0C59A",
+    "hair": "#8A6B58",
+    "clothing": "#D9E0E5",
+    "accent": "#52748F",
+    "style": "winter"
+  },
+  {
+    "id": "blitz-ben",
+    "name": "Blitz Ben",
+    "group": "men",
+    "skin": "#6F442E",
+    "hair": "#17110E",
+    "clothing": "#7A1F25",
+    "accent": "#DBA92E",
+    "style": "athletic"
+  },
+  {
+    "id": "fourth-and-long",
+    "name": "Fourth & Long",
+    "group": "men",
+    "skin": "#C98B5D",
+    "hair": "#5A3427",
+    "clothing": "#2B5A3B",
+    "accent": "#E1C36A",
+    "style": "practice"
+  },
+  {
+    "id": "captain-jack",
+    "name": "Captain Jack",
+    "group": "men",
+    "skin": "#E3B88F",
+    "hair": "#2B201B",
+    "clothing": "#244F7A",
+    "accent": "#E1B53C",
+    "style": "captain"
+  },
+  {
+    "id": "raven-queen",
+    "name": "Raven Queen",
+    "group": "women",
+    "skin": "#A86A50",
+    "hair": "#281A2D",
+    "clothing": "#4A2868",
+    "accent": "#D6AC40",
+    "style": "jacket"
+  },
+  {
+    "id": "touchdown-tina",
+    "name": "Touchdown Tina",
+    "group": "women",
+    "skin": "#E1AD80",
+    "hair": "#A9673D",
+    "clothing": "#932D35",
+    "accent": "#F0C45B",
+    "style": "jersey"
+  },
+  {
+    "id": "victory-vicki",
+    "name": "Victory Vicki",
+    "group": "women",
+    "skin": "#F0C19A",
+    "hair": "#D1A169",
+    "clothing": "#315C8C",
+    "accent": "#D9B141",
+    "style": "fan"
+  },
+  {
+    "id": "end-zone-emma",
+    "name": "End Zone Emma",
+    "group": "women",
+    "skin": "#7C4A34",
+    "hair": "#191514",
+    "clothing": "#285A46",
+    "accent": "#E0B443",
+    "style": "hoodie"
+  },
+  {
+    "id": "blitz-bella",
+    "name": "Blitz Bella",
+    "group": "women",
+    "skin": "#C78664",
+    "hair": "#4A2D22",
+    "clothing": "#C06426",
+    "accent": "#F0C45B",
+    "style": "athletic"
+  },
+  {
+    "id": "captain-kate",
+    "name": "Captain Kate",
+    "group": "women",
+    "skin": "#E8B68D",
+    "hair": "#35201B",
+    "clothing": "#262B31",
+    "accent": "#D4AB3C",
+    "style": "coach"
+  },
+  {
+    "id": "gridiron-grace",
+    "name": "Gridiron Grace",
+    "group": "women",
+    "skin": "#5E392B",
+    "hair": "#19100E",
+    "clothing": "#F0EEE5",
+    "accent": "#D7A72C",
+    "style": "jersey"
+  },
+  {
+    "id": "saints-sweetie",
+    "name": "Saints Sweetie",
+    "group": "women",
+    "skin": "#D89C76",
+    "hair": "#8B593F",
+    "clothing": "#182F4D",
+    "accent": "#DAB241",
+    "style": "supporter"
+  }
+]
