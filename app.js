@@ -23,22 +23,66 @@ let pickCountdownTimer = null;
 let playerNameCheckTimer = null;
 let playerNameAvailable = false;
 
-const AVATAR_CHOICES = ["🏈", "🦬", "🦅", "🐻", "🦁", "🐺", "🦈", "🐂", "⚡", "🔥", "🚀", "⭐", "🏆", "👑", "🛡️", "🎯", "🤠", "😎", "🧙", "🥷"];
-let selectedSignupAvatar = "🏈";
+const CHARACTER_CHOICES = [{"id":"clutch-chris","name":"Clutch Chris","group":"men","skin":"#D9A06C","hair":"#3A241B","clothing":"#123A63","accent":"#D5A62A","style":"jersey"},{"id":"sunday-sniper","name":"Sunday Sniper","group":"men","skin":"#B97850","hair":"#151515","clothing":"#17191D","accent":"#D6AE42","style":"hoodie"},{"id":"gridiron-gary","name":"Gridiron Gary","group":"men","skin":"#E0AE7A","hair":"#6A3922","clothing":"#263E58","accent":"#E0B440","style":"varsity"},{"id":"the-general","name":"The General","group":"men","skin":"#9E6448","hair":"#27211D","clothing":"#2C2F33","accent":"#D0A43A","style":"coach"},{"id":"ice-man","name":"Ice Man","group":"men","skin":"#F0C59A","hair":"#8A6B58","clothing":"#D9E0E5","accent":"#52748F","style":"winter"},{"id":"blitz-ben","name":"Blitz Ben","group":"men","skin":"#6F442E","hair":"#17110E","clothing":"#7A1F25","accent":"#DBA92E","style":"athletic"},{"id":"fourth-and-long","name":"Fourth & Long","group":"men","skin":"#C98B5D","hair":"#5A3427","clothing":"#2B5A3B","accent":"#E1C36A","style":"practice"},{"id":"captain-jack","name":"Captain Jack","group":"men","skin":"#E3B88F","hair":"#2B201B","clothing":"#244F7A","accent":"#E1B53C","style":"captain"},{"id":"raven-queen","name":"Raven Queen","group":"women","skin":"#A86A50","hair":"#281A2D","clothing":"#4A2868","accent":"#D6AC40","style":"jacket"},{"id":"touchdown-tina","name":"Touchdown Tina","group":"women","skin":"#E1AD80","hair":"#A9673D","clothing":"#932D35","accent":"#F0C45B","style":"jersey"},{"id":"victory-vicki","name":"Victory Vicki","group":"women","skin":"#F0C19A","hair":"#D1A169","clothing":"#315C8C","accent":"#D9B141","style":"fan"},{"id":"end-zone-emma","name":"End Zone Emma","group":"women","skin":"#7C4A34","hair":"#191514","clothing":"#285A46","accent":"#E0B443","style":"hoodie"},{"id":"blitz-bella","name":"Blitz Bella","group":"women","skin":"#C78664","hair":"#4A2D22","clothing":"#C06426","accent":"#F0C45B","style":"athletic"},{"id":"captain-kate","name":"Captain Kate","group":"women","skin":"#E8B68D","hair":"#35201B","clothing":"#262B31","accent":"#D4AB3C","style":"coach"},{"id":"gridiron-grace","name":"Gridiron Grace","group":"women","skin":"#5E392B","hair":"#19100E","clothing":"#F0EEE5","accent":"#D7A72C","style":"jersey"},{"id":"saints-sweetie","name":"Saints Sweetie","group":"women","skin":"#D89C76","hair":"#8B593F","clothing":"#182F4D","accent":"#DAB241","style":"supporter"}];
+const LEGACY_AVATARS = new Set(["🏈","🦬","🦅","🐻","🦁","🐺","🦈","🐂","⚡","🔥","🚀","⭐","🏆","👑","🛡️","🎯","🤠","😎","🧙","🥷"]);
+let selectedSignupAvatar = "clutch-chris";
+
+function getCharacter(value) {
+  return CHARACTER_CHOICES.find(character => character.id === value) || CHARACTER_CHOICES[0];
+}
+
+function characterMarkup(value, className = "character-portrait") {
+  if (LEGACY_AVATARS.has(value)) {
+    return `<span class="${className} legacy-character">${esc(value)}</span>`;
+  }
+  const character = getCharacter(value);
+  return `<img class="${className}" src="characters/${character.id}.svg" alt="${esc(character.name)}">`;
+}
 
 function renderAvatarPicker(containerId, selected, onSelect) {
   const container = $(containerId);
   if (!container) return;
-  container.innerHTML = AVATAR_CHOICES.map(avatar => `
-    <button type="button" class="avatar-choice ${avatar === selected ? "selected" : ""}" data-avatar="${esc(avatar)}" aria-label="Select ${esc(avatar)}">${esc(avatar)}</button>
-  `).join("");
-  container.querySelectorAll(".avatar-choice").forEach(button => {
-    button.onclick = () => {
-      container.querySelectorAll(".avatar-choice").forEach(item => item.classList.remove("selected"));
-      button.classList.add("selected");
-      onSelect(button.dataset.avatar);
-    };
+  const selectedCharacter = getCharacter(selected);
+
+  container.innerHTML = `
+    <div class="character-tabs" role="tablist">
+      <button type="button" class="character-tab active" data-group="men">Men</button>
+      <button type="button" class="character-tab" data-group="women">Women</button>
+    </div>
+    <div class="character-grid"></div>
+  `;
+
+  const grid = container.querySelector(".character-grid");
+  const renderGroup = group => {
+    container.querySelectorAll(".character-tab").forEach(tab =>
+      tab.classList.toggle("active", tab.dataset.group === group)
+    );
+    grid.innerHTML = CHARACTER_CHOICES.filter(character => character.group === group).map(character => `
+      <button type="button"
+        class="character-choice ${character.id === selected ? "selected" : ""}"
+        data-avatar="${character.id}"
+        data-name="${esc(character.name)}"
+        aria-label="Select ${esc(character.name)}">
+        <img src="characters/${character.id}.svg" alt="">
+        <strong>${esc(character.name)}</strong>
+      </button>
+    `).join("");
+
+    grid.querySelectorAll(".character-choice").forEach(button => {
+      button.onclick = () => {
+        grid.querySelectorAll(".character-choice").forEach(item => item.classList.remove("selected"));
+        button.classList.add("selected");
+        selected = button.dataset.avatar;
+        onSelect(button.dataset.avatar, button.dataset.name);
+      };
+    });
+  };
+
+  container.querySelectorAll(".character-tab").forEach(tab => {
+    tab.onclick = () => renderGroup(tab.dataset.group);
   });
+
+  renderGroup(selectedCharacter.group);
 }
 
 if (!configured) $("setupWarning").classList.remove("hidden");
@@ -149,9 +193,11 @@ $("playerName")?.addEventListener("input", () => {
   playerNameCheckTimer = setTimeout(checkPlayerNameAvailability, 350);
 });
 
-renderAvatarPicker("signupAvatarPicker", selectedSignupAvatar, avatar => {
+renderAvatarPicker("signupAvatarPicker", selectedSignupAvatar, (avatar, suggestedName) => {
   selectedSignupAvatar = avatar;
   $("selectedAvatar").value = avatar;
+  const playerNameInput = $("playerName");
+  if (playerNameInput && !playerNameInput.value.trim()) playerNameInput.value = suggestedName;
 });
 
 $("loginForm").onsubmit = async event => {
@@ -230,9 +276,11 @@ $("signupForm").onsubmit = async event => {
     $("signupForm").reset();
     selectedSignupAvatar = "🏈";
     $("selectedAvatar").value = selectedSignupAvatar;
-    renderAvatarPicker("signupAvatarPicker", selectedSignupAvatar, avatar => {
+    renderAvatarPicker("signupAvatarPicker", selectedSignupAvatar, (avatar, suggestedName) => {
       selectedSignupAvatar = avatar;
       $("selectedAvatar").value = avatar;
+      const playerNameInput = $("playerName");
+      if (playerNameInput && !playerNameInput.value.trim()) playerNameInput.value = suggestedName;
     });
     playerNameAvailable = false;
     $("playerNameStatus").textContent = "Choose the name other players will see.";
@@ -400,7 +448,7 @@ function renderWelcomePage(myPicks = null) {
   const pickHistory = Array.isArray(myPicks) ? myPicks : [];
   const wins = pickHistory.filter(pick => pick.result === "win").length;
 
-  $("welcomeAvatar").textContent = me.avatar || "SOS";
+  $("welcomeAvatar").innerHTML = characterMarkup(me.avatar, "welcome-character-image");
   $("welcomePlayerName").textContent = me.nickname || "Survivor";
   $("welcomeRealName").textContent =
     `${me.first_name || ""} ${me.last_name || ""}`.trim() || "Ready for game day";
@@ -490,20 +538,20 @@ function renderIdentity() {
 
   $("identity").innerHTML = `
     <div class="identity">
-      <div class="avatar">${esc(me.avatar)}</div>
+      <div class="avatar">${characterMarkup(me.avatar, "identity-character-image")}</div>
       <div class="identity-copy">
         <div class="identity-label">PLAYER NAME</div>
         <h2>${esc(me.nickname)}</h2>
         <div class="identity-status">${esc(status)}</div>
         <div class="small">Losses: ${Number(me.losses || 0)} &bull; Mulligans remaining: ${Math.max(0, 2 - Number(me.losses || 0))}</div>
-        ${canEditPlayerName ? `<div class="identity-actions"><button id="editPlayerNameBtn" class="secondary compact-btn">Change Player Name</button><button id="editAvatarBtn" class="secondary compact-btn">Change Avatar</button></div>` : `<div class="small locked-name">Player identity locked for this season.</div>`}
+        ${canEditPlayerName ? `<div class="identity-actions"><button id="editPlayerNameBtn" class="secondary compact-btn">Change Player Name</button><button id="editAvatarBtn" class="secondary compact-btn">Change Character</button></div>` : `<div class="small locked-name">Player identity locked for this season.</div>`}
       </div>
     </div>
     <div id="avatarEditor" class="player-name-editor hidden">
-      <label>Choose Your Avatar</label>
+      <label>Choose Your Character</label>
       <div id="editAvatarPicker" class="avatar-picker"></div>
       <div class="inline-actions">
-        <button id="saveAvatarBtn">Save Avatar</button>
+        <button id="saveAvatarBtn">Save Character</button>
         <button id="cancelAvatarBtn" class="secondary">Cancel</button>
       </div>
     </div>
@@ -519,7 +567,7 @@ function renderIdentity() {
 
   if (!canEditPlayerName) return;
 
-  let pendingAvatar = me.avatar || "🏈";
+  let pendingAvatar = me.avatar || "clutch-chris";
   renderAvatarPicker("editAvatarPicker", pendingAvatar, avatar => { pendingAvatar = avatar; });
   $("editAvatarBtn").onclick = () => $("avatarEditor").classList.remove("hidden");
   $("cancelAvatarBtn").onclick = () => $("avatarEditor").classList.add("hidden");
@@ -640,7 +688,7 @@ function renderSurvivorList(elementId, players, onBench) {
     return `
       <div class="survivor-row">
         <div class="survivor-name">
-          <div class="mini-avatar">${esc(player.avatar)}</div>
+          <div class="mini-avatar">${characterMarkup(player.avatar, "mini-character-image")}</div>
           <strong>${esc(player.nickname)}</strong>
         </div>
         ${badge}
@@ -1106,7 +1154,7 @@ function renderCommissionerPlayerBoard() {
       <tr>
         <td>
           <div class="player-board-player">
-            <div class="mini-avatar">${esc(row.avatar)}</div>
+            <div class="mini-avatar">${row.avatar === "INV" ? "INV" : characterMarkup(row.avatar, "mini-character-image")}</div>
             <div>
               <strong>${esc(row.nickname || row.name)}</strong>
               ${row.nickname ? `<div class="small">${esc(row.name)}</div>` : ""}
@@ -1130,7 +1178,7 @@ function renderLockerRoom() {
   $("lockerRoom").innerHTML = allProfiles.length ? allProfiles.map(player => `
     <div class="locker-card">
       <div class="survivor-name">
-        <div class="mini-avatar">${esc(player.avatar)}</div>
+        <div class="mini-avatar">${characterMarkup(player.avatar, "mini-character-image")}</div>
         <div><strong>${esc(player.nickname)}</strong><div class="small">${esc(player.first_name)} ${esc(player.last_name)}</div></div>
       </div>
       <div>

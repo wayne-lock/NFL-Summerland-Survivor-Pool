@@ -119,7 +119,7 @@
         <div class="form-heading">
           <div class="form-eyebrow">WELCOME TO THE LOCKER ROOM</div>
           <h2>Create Your Player Identity</h2>
-          <p>Choose your Player Name and avatar, then enter this season's competition.</p>
+          <p>Choose your Player Name and character, then enter this season's competition.</p>
         </div>
         <label>First name</label>
         <input id="firstName" required maxlength="30" autocomplete="given-name">
@@ -128,9 +128,9 @@
         <label>Player Name</label>
         <input id="playerName" required maxlength="20" autocomplete="off" placeholder="Example: Sunday Sniper">
         <div id="playerNameStatus" class="player-name-status"></div>
-        <label>Choose Your Avatar</label>
-        <div id="signupAvatarPicker" class="avatar-picker" aria-label="Choose your avatar"></div>
-        <input id="selectedAvatar" type="hidden" value="ð">
+        <label>Choose Your Character</label>
+        <div id="signupAvatarPicker" class="avatar-picker" aria-label="Choose your character"></div>
+        <input id="selectedAvatar" type="hidden" value="clutch-chris">
         <label>Email</label>
         <input id="signupEmail" type="email" required autocomplete="email">
         <label>Password</label>
@@ -265,10 +265,10 @@
       <div class="section-title-row"><div><div class="eyebrow dark">GAME CONTROL</div><h2>Commissioner Command Centre</h2></div><span class="live-chip"><i></i> LIVE</span></div>
 
       <div class="commissioner-cards">
-        <div class="commissioner-card"><span>Season</span><strong id="commissionerSeason">â</strong></div>
-        <div class="commissioner-card"><span>Week</span><strong id="commissionerWeek">â</strong></div>
-        <div class="commissioner-card"><span>Survivors</span><strong id="commissionerPlayers">â</strong></div>
-        <div class="commissioner-card"><span>Prize Pool</span><strong id="commissionerPrize">â</strong></div>
+        <div class="commissioner-card"><span>Season</span><strong id="commissionerSeason">—</strong></div>
+        <div class="commissioner-card"><span>Week</span><strong id="commissionerWeek">—</strong></div>
+        <div class="commissioner-card"><span>Survivors</span><strong id="commissionerPlayers">—</strong></div>
+        <div class="commissioner-card"><span>Prize Pool</span><strong id="commissionerPrize">—</strong></div>
       </div>
 
       <section class="control-centre">
@@ -344,18 +344,18 @@
       <section class="commissioner-weekly-board">
         <div class="weekly-board-heading">
           <div>
-            <h3>Week <span id="boardWeek">â</span> Player Board</h3>
+            <h3>Week <span id="boardWeek">—</span> Player Board</h3>
             <p class="small">Live pool status. Refresh the page to see the latest changes.</p>
           </div>
           <div id="missingPickAlert" class="missing-pick-alert"></div>
         </div>
 
         <div class="weekly-summary-grid">
-          <div class="weekly-summary-card"><span>Registered</span><strong id="boardRegistered">â</strong></div>
-          <div class="weekly-summary-card"><span>Joined</span><strong id="boardJoined">â</strong></div>
-          <div class="weekly-summary-card"><span>Picks Submitted</span><strong id="boardPicksSubmitted">â</strong></div>
-          <div class="weekly-summary-card"><span>Waiting</span><strong id="boardWaiting">â</strong></div>
-          <div class="weekly-summary-card"><span>On the Bench</span><strong id="boardBench">â</strong></div>
+          <div class="weekly-summary-card"><span>Registered</span><strong id="boardRegistered">—</strong></div>
+          <div class="weekly-summary-card"><span>Joined</span><strong id="boardJoined">—</strong></div>
+          <div class="weekly-summary-card"><span>Picks Submitted</span><strong id="boardPicksSubmitted">—</strong></div>
+          <div class="weekly-summary-card"><span>Waiting</span><strong id="boardWaiting">—</strong></div>
+          <div class="weekly-summary-card"><span>On the Bench</span><strong id="boardBench">—</strong></div>
         </div>
 
         <label for="playerSearch">Search players</label>
@@ -405,7 +405,7 @@
   </section>
 </main>
 
-<footer><strong>Season of the Survivors</strong><span>Version 3.3 Welcome Edition &bull; Private League by Invitation</span></footer>
+<footer><strong>Season of the Survivors</strong><span>Version 3.4 Character Edition &bull; Private League by Invitation</span></footer>
 
 <script src="config.js"></script>
 <script src="app.js"></script>
