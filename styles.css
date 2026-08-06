@@ -2230,7 +2230,107 @@ footer{
   }
 }
 
-.
+/* =========================================================
+   VERSION 3.3 â FINAL APPROVED WELCOME DESIGN
+   Matches the approved stadium dashboard concept.
+   ========================================================= */
+
+#welcomeView{
+  width:min(100%,1536px);
+  margin:0 auto;
+  border-radius:0;
+  min-height:calc(100vh - 54px);
+}
+
+.welcome-shell{
+  grid-template-columns:minmax(0,1.45fr) minmax(420px,.85fr);
+  min-height:760px;
+  padding:30px 30px 18px;
+  gap:24px;
+}
+
+.welcome-hero{
+  justify-content:flex-start;
+  padding:14px 12px 4px;
+}
+
+.welcome-crest{
+  width:min(292px,55%);
+  margin:26px 0 18px;
+  padding:43px 22px 27px;
+  border-width:5px;
+  box-shadow:0 0 0 5px rgba(173,196,214,.85),0 0 0 8px rgba(3,14,29,.95),0 17px 36px rgba(0,0,0,.48),inset 0 0 26px rgba(56,138,201,.27);
+}
+
+.welcome-crest::before,.welcome-crest::after{width:76px;height:112px;bottom:-8px;}
+.welcome-crest::before{left:-38px;}
+.welcome-crest::after{right:-38px;}
+.welcome-crest-stars{top:15px;font-size:1rem;}
+.welcome-crest-sos{font-size:clamp(3.8rem,7.2vw,6.1rem);}
+.welcome-crest-ribbon{margin:8px 0 3px;padding:6px 9px;font-size:.68rem;}
+.welcome-crest-name{font-size:clamp(1.25rem,2.7vw,2.25rem);}
+.welcome-crest-football{width:66px;height:38px;margin-top:8px;}
+
+.welcome-challenge{
+  width:100%;
+  margin:3px 0 14px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(2rem,4.3vw,4rem);
+  line-height:1.02;
+  letter-spacing:.015em;
+  text-transform:uppercase;
+}
+
+.welcome-challenge > div,.welcome-challenge strong{
+  display:block;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:inherit;
+  font-weight:900;
+  line-height:inherit;
+  letter-spacing:inherit;
+}
+
+.welcome-challenge > div{color:#eef2f5;text-shadow:0 2px 0 #647481,0 5px 0 #26333d,0 10px 18px rgba(0,0,0,.72);}
+.welcome-challenge strong{margin-top:12px;color:#e3b43d;text-shadow:0 2px 0 #88610d,0 5px 0 #4b3307,0 10px 18px rgba(0,0,0,.72);}
+.welcome-challenge strong::before{content:"* * * * *";display:block;margin:0 0 9px;color:#e3b43d;font-size:.85rem;letter-spacing:.35em;text-shadow:none;}
+
+.welcome-rules{max-width:720px;margin-top:auto;}
+.welcome-dashboard{justify-content:flex-start;padding-top:4px;gap:13px;}
+.welcome-player-card{min-height:247px;}
+.welcome-pick-card{min-height:184px;}
+.welcome-deadline-card{min-height:156px;}
+.welcome-history-button{min-height:54px;}
+
+.welcome-nav{position:relative;z-index:4;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(203,221,234,.38);box-shadow:0 -8px 24px rgba(0,0,0,.22);}
+.welcome-nav button{min-height:62px;}
+#welcomeSignOutBtn{display:block !important;visibility:visible !important;opacity:1 !important;color:#ff5454;background:rgba(65,3,9,.20);}
+
+.welcome-stadium{background:radial-gradient(ellipse at 50% 1%,rgba(33,101,158,.52),transparent 30%),radial-gradient(ellipse at 8% 25%,rgba(235,245,255,.12),transparent 20%),radial-gradient(ellipse at 92% 25%,rgba(235,245,255,.12),transparent 20%),linear-gradient(180deg,#010712 0%,#071a2d 45%,#071421 60%,#031009 100%);}
+.welcome-light{top:4%;width:190px;height:82px;}
+.welcome-light-left{left:1.5%;}
+.welcome-light-right{right:1.5%;}
+
+@media(max-width:1180px){
+  .welcome-shell{grid-template-columns:minmax(0,1.25fr) minmax(360px,.75fr);min-height:690px;padding:22px 22px 14px;}
+  .welcome-crest{width:min(245px,48%);margin-top:14px;}
+  .welcome-challenge{font-size:clamp(1.8rem,4vw,3.3rem);}
+  .welcome-player-card{min-height:215px;}
+  .welcome-pick-card{min-height:165px;}
+  .welcome-deadline-card{min-height:140px;}
+}
+
+@media(max-width:900px){
+  .welcome-shell{grid-template-columns:1fr;}
+  .welcome-dashboard{max-width:680px;margin-inline:auto;}
+  .welcome-nav{grid-template-columns:repeat(2,1fr);}
+}
+
+
+
+
+
+
+
 
 
 
