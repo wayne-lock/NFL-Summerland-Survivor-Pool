@@ -2494,3 +2494,21 @@ footer{
 .mini-character-image{width:100%;height:100%;object-fit:cover;display:block}
 .identity-character-image,.welcome-character-image{object-fit:cover;display:block}
 @media (max-width:640px){.survivor-row{align-items:center}.mini-avatar{width:46px;height:46px;flex-basis:46px}}
+
+/* Version 3.5.1 portrait refinement */
+.character-choice img,
+.character-portrait,
+.identity-character-image,
+.mini-character-image,
+.welcome-character-image {
+  object-position: center 22%;
+  background: #071421;
+}
+.character-choice img {
+  aspect-ratio: 1 / 0.86;
+}
+.welcome-avatar,
+.avatar,
+.mini-avatar {
+  box-shadow: 0 0 0 2px rgba(242,200,78,.18), 0 8px 24px rgba(0,0,0,.36);
+}

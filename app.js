@@ -36,7 +36,7 @@ function characterMarkup(value, className = "character-portrait") {
     return `<span class="${className} legacy-character">${esc(value)}</span>`;
   }
   const character = getCharacter(value);
-  return `<img class="${className}" src="${character.id}.svg" alt="${esc(character.name)}">`;
+  return `<img class="${className}" src="${character.id}.svg?v=351" alt="${esc(character.name)}">`;
 }
 
 function renderAvatarPicker(containerId, selected, onSelect) {
@@ -63,7 +63,7 @@ function renderAvatarPicker(containerId, selected, onSelect) {
         data-avatar="${character.id}"
         data-name="${esc(character.name)}"
         aria-label="Select ${esc(character.name)}">
-        <img src="${character.id}.svg" alt="">
+        <img src="${character.id}.svg?v=351" alt="">
         <strong>${esc(character.name)}</strong>
       </button>
     `).join("");
@@ -346,15 +346,20 @@ function showAuth() {
 }
 
 function showWelcomePage() {
-  if (!me || me.is_admin) {
-    showPickPage();
+  if (!me) {
+    showAuth();
     return;
   }
 
   renderWelcomePage();
   setMainView("welcomeView");
   $("logoutBtn")?.classList.add("hidden");
-  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  // Force the Welcome Back screen to be the first signed-in view,
+  // including for the Commissioner account.
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  });
 }
 
 function showPickPage() {
@@ -408,10 +413,10 @@ async function loadApp(user) {
 
   if (me.is_admin) {
     setupCommissioner();
-    showPickPage();
-  } else {
-    showWelcomePage();
   }
+
+  // Every signed-in account sees the premium Welcome Back page first.
+  showWelcomePage();
 }
 
 function formatWelcomeDate(value) {
