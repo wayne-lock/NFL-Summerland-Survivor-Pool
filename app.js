@@ -36,7 +36,7 @@ function characterMarkup(value, className = "character-portrait") {
     return `<span class="${className} legacy-character">${esc(value)}</span>`;
   }
   const character = getCharacter(value);
-  return `<img class="${className}" src="characters/${character.id}.svg" alt="${esc(character.name)}">`;
+  return `<img class="${className}" src="${character.id}.svg" alt="${esc(character.name)}">`;
 }
 
 function renderAvatarPicker(containerId, selected, onSelect) {
@@ -63,7 +63,7 @@ function renderAvatarPicker(containerId, selected, onSelect) {
         data-avatar="${character.id}"
         data-name="${esc(character.name)}"
         aria-label="Select ${esc(character.name)}">
-        <img src="characters/${character.id}.svg" alt="">
+        <img src="${character.id}.svg" alt="">
         <strong>${esc(character.name)}</strong>
       </button>
     `).join("");
@@ -972,7 +972,13 @@ function setupCommissioner() {
     if (!error) {
       settings = {...settings, ...updates};
       $("seasonDisplay").textContent = settings.season;
+      $("currentWeek").textContent = settings.current_week;
+      $("commissionerWeek").textContent = settings.current_week;
+      $("boardWeek").textContent = settings.current_week;
+      await loadSchedule();
       await loadSharedData();
+      renderCurrentPickCard();
+      renderGames();
     }
   };
 

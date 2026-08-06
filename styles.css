@@ -2485,3 +2485,12 @@ footer{
   .character-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
   .character-tab{min-width:115px;}
 }
+
+/* v3.5 Survivor Edition — character/name consistency */
+.survivor-row{min-height:72px;padding:10px 14px;gap:12px}
+.survivor-name{display:flex;align-items:center;gap:12px;min-width:0}
+.survivor-name strong{font-size:1rem;line-height:1.15;overflow-wrap:anywhere}
+.mini-avatar{width:50px;height:50px;flex:0 0 50px;border-radius:50%;overflow:hidden;background:#eef3f7;border:2px solid rgba(213,166,42,.55);display:grid;place-items:center}
+.mini-character-image{width:100%;height:100%;object-fit:cover;display:block}
+.identity-character-image,.welcome-character-image{object-fit:cover;display:block}
+@media (max-width:640px){.survivor-row{align-items:center}.mini-avatar{width:46px;height:46px;flex-basis:46px}}
