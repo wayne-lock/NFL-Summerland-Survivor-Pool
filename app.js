@@ -370,6 +370,16 @@ function showPickPage() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+function showCommissionerPage() {
+  setMainView("appView");
+  $("logoutBtn")?.classList.remove("hidden");
+
+  // Commissioner Sign In should open the Command Centre, not the player locker.
+  requestAnimationFrame(() => {
+    $("commissionerPanel")?.scrollIntoView({ behavior: "auto", block: "start" });
+  });
+}
+
 async function loadApp(user) {
   $("authView")?.classList.add("hidden");
   $("welcomeView")?.classList.add("hidden");
@@ -415,10 +425,10 @@ async function loadApp(user) {
 
   if (me.is_admin) {
     setupCommissioner();
+    showCommissionerPage();
+  } else {
+    showWelcomePage();
   }
-
-  // Every signed-in account sees the premium Welcome Back page first.
-  showWelcomePage();
 }
 
 function formatWelcomeDate(value) {
@@ -1267,6 +1277,7 @@ function renderLockerRoom() {
       <div class="locker-actions">
         <button onclick="togglePaid('${player.id}', ${!player.paid})">${player.paid ? "Mark Unpaid":"Mark Paid"}</button>
         <button class="${player.eliminated ? "":"danger-btn"}" onclick="toggleBench('${player.id}', ${!player.eliminated})">${player.eliminated ? "Return to Game":"Move to Bench"}</button>
+        ${player.id !== me.id ? `<button class="remove-player-btn" onclick="openRemovePlayer('${player.id}')">Remove Player</button>` : ""}
       </div>
     </div>`).join("") : '<p class="small">No survivors have joined yet.</p>';
 }
@@ -1282,6 +1293,54 @@ window.toggleBench = async (profileId, eliminated) => {
   if (error) return msg("commissionerMessage", error, true);
   await loadSharedData();
 };
+
+
+let pendingRemovePlayerId = null;
+
+window.openRemovePlayer = profileId => {
+  if (!me?.is_admin) return;
+  const player = allProfiles.find(item => item.id === profileId);
+  if (!player || player.id === me.id) return;
+
+  pendingRemovePlayerId = profileId;
+  const displayName = player.nickname || `${player.first_name || ""} ${player.last_name || ""}`.trim() || "this player";
+  $("removePlayerMessage").textContent =
+    `Remove ${displayName} completely from Season of the Survivors? It will be as if this player never joined the pool.`;
+  $("removePlayerModal")?.classList.remove("hidden");
+};
+
+function closeRemovePlayerModal() {
+  pendingRemovePlayerId = null;
+  $("removePlayerModal")?.classList.add("hidden");
+}
+
+$("cancelRemovePlayerBtn")?.addEventListener("click", closeRemovePlayerModal);
+$("removePlayerModal")?.querySelector(".remove-player-backdrop")?.addEventListener("click", closeRemovePlayerModal);
+
+$("confirmRemovePlayerBtn")?.addEventListener("click", async () => {
+  const profileId = pendingRemovePlayerId;
+  if (!profileId || !me?.is_admin) return;
+
+  const button = $("confirmRemovePlayerBtn");
+  button.disabled = true;
+  button.textContent = "DELETING...";
+
+  const { error } = await sb.rpc("commissioner_delete_player_permanently", {
+    p_profile_id: profileId
+  });
+
+  button.disabled = false;
+  button.textContent = "DELETE PLAYER PERMANENTLY";
+
+  if (error) {
+    msg("commissionerMessage", error.message || String(error), true);
+    return;
+  }
+
+  closeRemovePlayerModal();
+  msg("commissionerMessage", "Player permanently removed. Player count and prize pool recalculated.");
+  await loadSharedData();
+});
 
 function renderInvitations() {
   $("invitationList").innerHTML = allInvites.length ? allInvites.map(invite => {

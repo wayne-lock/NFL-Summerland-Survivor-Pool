@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Season of the Survivors | Summerland NFL Pool</title>
-  <link rel="stylesheet" href="styles.css?v=352">
+  <link rel="stylesheet" href="styles.css?v=3541">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -371,9 +371,26 @@
   </section>
 </main>
 
-<footer><strong>Season of the Survivors</strong><span>Version 3.5.3 Locker Edition &bull; Private League by Invitation</span></footer>
+<footer><strong>Season of the Survivors</strong><span>Version 3.5.4.1 Commissioner Route &bull; Private League by Invitation</span></footer>
 
 <script src="config.js"></script>
-<script src="app.js?v=352"></script>
+<script src="app.js?v=3541"></script>
+
+  <div id="removePlayerModal" class="remove-player-modal hidden" role="dialog" aria-modal="true" aria-labelledby="removePlayerTitle">
+    <div class="remove-player-backdrop"></div>
+    <section class="remove-player-dialog">
+      <div class="remove-player-warning">COMMISSIONER ACTION</div>
+      <h2 id="removePlayerTitle">Permanently remove this player?</h2>
+      <p id="removePlayerMessage"></p>
+      <div class="remove-player-consequence">
+        This deletes the player, all picks and pool history, and their login. The player count and prize pool will be recalculated immediately. This cannot be undone.
+      </div>
+      <div class="remove-player-actions">
+        <button id="cancelRemovePlayerBtn" type="button">CANCEL</button>
+        <button id="confirmRemovePlayerBtn" type="button" class="permanent-delete-btn">DELETE PLAYER PERMANENTLY</button>
+      </div>
+    </section>
+  </div>
+
 </body>
 </html>
