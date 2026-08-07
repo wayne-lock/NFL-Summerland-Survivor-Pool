@@ -2578,3 +2578,15 @@ footer{
   .launch-hero.stadium-opening{aspect-ratio:4 / 3;padding:0}
   .stadium-hotspot{border-radius:7px}
 }
+
+/* =========================================================
+   Version 3.5.2.1 — 15% iPad opening-page resize test
+   Keeps the stadium artwork and hotspots proportional.
+   ========================================================= */
+@media (min-width: 821px) and (orientation: landscape) {
+  #authView.launch-auth {
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
