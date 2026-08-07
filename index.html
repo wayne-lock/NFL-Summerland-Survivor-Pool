@@ -166,9 +166,28 @@
       <button id="welcomeLockerBtn" type="button">MY LOCKER</button>
       <button id="welcomeSignOutBtn" type="button">SIGN OUT</button>
     </nav>
+
+    <div id="pickHistoryModal" class="pick-history-modal hidden" role="dialog" aria-modal="true" aria-labelledby="pickHistoryTitle">
+      <div class="pick-history-backdrop" id="pickHistoryBackdrop"></div>
+      <section class="pick-history-dialog">
+        <div class="pick-history-heading">
+          <div>
+            <div class="welcome-eyebrow">MY SURVIVOR RUN</div>
+            <h2 id="pickHistoryTitle">Pick History</h2>
+          </div>
+          <button id="closePickHistoryBtn" type="button" class="pick-history-close" aria-label="Close pick history">×</button>
+        </div>
+        <div id="pickHistoryList" class="pick-history-list"></div>
+      </section>
+    </div>
   </section>
 
   <section id="appView" class="hidden">
+    <div class="player-app-toolbar">
+      <button id="backToLockerBtn" type="button" class="back-to-locker-button">
+        <span aria-hidden="true">←</span> BACK TO MY LOCKER
+      </button>
+    </div>
     <div class="game-day-strip"><span>GAME DAY CONTROL</span><strong>Season of the Survivors</strong></div>
     <div class="summary">
       <div class="stat"><strong id="currentWeek">1</strong><span>Current Week</span></div>
@@ -352,7 +371,7 @@
   </section>
 </main>
 
-<footer><strong>Season of the Survivors</strong><span>Version 3.5.2 Survivor Edition &bull; Private League by Invitation</span></footer>
+<footer><strong>Season of the Survivors</strong><span>Version 3.5.3 Locker Edition &bull; Private League by Invitation</span></footer>
 
 <script src="config.js"></script>
 <script src="app.js?v=352"></script>

@@ -2590,3 +2590,172 @@ footer{
     margin-right: auto;
   }
 }
+
+
+/* =========================================================
+   Version 3.5.3 — Locker navigation + real Pick History
+   ========================================================= */
+.player-app-toolbar {
+  max-width: 1480px;
+  margin: 0 auto 14px;
+  padding: 12px 18px 0;
+}
+.back-to-locker-button {
+  width: auto;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid rgba(222,174,49,.6);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #173f6a, #0b2848);
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: .04em;
+  box-shadow: 0 8px 22px rgba(0,0,0,.24);
+}
+.back-to-locker-button span {
+  color: #f3c44d;
+  margin-right: 8px;
+  font-size: 1.2em;
+}
+
+.pick-history-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.pick-history-modal.hidden {
+  display: none;
+}
+.pick-history-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2,10,20,.82);
+  backdrop-filter: blur(8px);
+}
+.pick-history-dialog {
+  position: relative;
+  width: min(760px, 94vw);
+  max-height: 82vh;
+  overflow: auto;
+  padding: 28px;
+  border: 1px solid rgba(223,174,48,.72);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(33,114,158,.25), transparent 38%),
+    linear-gradient(155deg, #092440, #051523 72%);
+  color: #fff;
+  box-shadow: 0 28px 80px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.pick-history-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.pick-history-heading h2 {
+  margin: 4px 0 0;
+  color: #fff;
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+}
+.pick-history-close {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.22);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+}
+.pick-history-list {
+  display: grid;
+  gap: 12px;
+}
+.pick-history-row {
+  display: grid;
+  grid-template-columns: 82px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 17px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  background: rgba(255,255,255,.055);
+}
+.pick-history-week {
+  display: grid;
+  place-items: center;
+  padding: 7px 4px;
+  border-right: 1px solid rgba(255,255,255,.13);
+}
+.pick-history-week span {
+  color: #e7bb43;
+  font-size: .7rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+.pick-history-week strong {
+  font-size: 1.55rem;
+}
+.pick-history-team {
+  display: grid;
+  gap: 4px;
+}
+.pick-history-team strong {
+  font-size: 1.08rem;
+}
+.pick-history-team span {
+  color: #b8c8d8;
+  font-size: .86rem;
+}
+.pick-history-status {
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: .76rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+.history-win {
+  color: #dff8e5;
+  background: rgba(42,153,82,.25);
+  border: 1px solid rgba(77,206,119,.45);
+}
+.history-loss {
+  color: #ffe3e3;
+  background: rgba(179,57,57,.25);
+  border: 1px solid rgba(235,95,95,.45);
+}
+.history-pending {
+  color: #fff0b5;
+  background: rgba(205,158,38,.20);
+  border: 1px solid rgba(232,190,66,.42);
+}
+.pick-history-empty {
+  display: grid;
+  gap: 8px;
+  padding: 28px;
+  text-align: center;
+  border: 1px dashed rgba(231,187,67,.45);
+  border-radius: 16px;
+  color: #bdcad7;
+}
+.pick-history-empty strong {
+  color: #fff;
+  font-size: 1.12rem;
+}
+body.history-open {
+  overflow: hidden;
+}
+@media (max-width: 700px) {
+  .pick-history-row {
+    grid-template-columns: 64px 1fr;
+  }
+  .pick-history-status {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

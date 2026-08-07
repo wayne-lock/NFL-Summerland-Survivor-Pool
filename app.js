@@ -19,6 +19,7 @@ let allProfiles = [];
 let allInvites = [];
 let currentWeekPicks = [];
 let currentPick = null;
+let myPickHistory = [];
 let pickCountdownTimer = null;
 let playerNameCheckTimer = null;
 let playerNameAvailable = false;
@@ -335,6 +336,7 @@ function showAuth() {
   games = [];
   usedTeams = [];
   currentPick = null;
+  myPickHistory = [];
 
   setMainView("authView");
   $("logoutBtn")?.classList.add("hidden");
@@ -351,7 +353,7 @@ function showWelcomePage() {
     return;
   }
 
-  renderWelcomePage();
+  renderWelcomePage(myPickHistory);
   setMainView("welcomeView");
   $("logoutBtn")?.classList.add("hidden");
 
@@ -503,13 +505,78 @@ function renderWelcomePage(myPicks = null) {
     deadline ? formatWelcomeTime(deadline) : "";
 }
 
+function formatHistoryStatus(result) {
+  if (result === "win") return { label: "WIN", className: "history-win" };
+  if (result === "loss") return { label: "LOSS", className: "history-loss" };
+  return { label: "PENDING", className: "history-pending" };
+}
+
+function renderPickHistory() {
+  const target = $("pickHistoryList");
+  if (!target) return;
+
+  const picks = Array.isArray(myPickHistory)
+    ? [...myPickHistory].sort((a, b) => Number(a.week || 0) - Number(b.week || 0))
+    : [];
+
+  if (!picks.length) {
+    target.innerHTML = `
+      <div class="pick-history-empty">
+        <strong>Your survivor run starts here.</strong>
+        <span>No picks have been recorded yet.</span>
+      </div>
+    `;
+    return;
+  }
+
+  target.innerHTML = picks.map(pick => {
+    const status = formatHistoryStatus(pick.result);
+    const kickoff = pick.game_kickoff
+      ? new Date(pick.game_kickoff).toLocaleString([], {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit"
+        })
+      : "Game time unavailable";
+
+    return `
+      <article class="pick-history-row">
+        <div class="pick-history-week">
+          <span>WEEK</span>
+          <strong>${esc(pick.week)}</strong>
+        </div>
+        <div class="pick-history-team">
+          <strong>${esc(pick.team_name || pick.team_abbr || "Team")}</strong>
+          <span>${esc(kickoff)}</span>
+        </div>
+        <span class="pick-history-status ${status.className}">${status.label}</span>
+      </article>
+    `;
+  }).join("");
+}
+
+function openPickHistory() {
+  renderPickHistory();
+  $("pickHistoryModal")?.classList.remove("hidden");
+  document.body.classList.add("history-open");
+}
+
+function closePickHistory() {
+  $("pickHistoryModal")?.classList.add("hidden");
+  document.body.classList.remove("history-open");
+}
+
 function bindWelcomePageControls() {
   $("enterPickPageBtn")?.addEventListener("click", showPickPage);
 
-  $("welcomeHistoryBtn")?.addEventListener("click", () => {
-    showPickPage();
-    $("currentPickCard")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
+  $("welcomeHistoryBtn")?.addEventListener("click", openPickHistory);
+
+  $("closePickHistoryBtn")?.addEventListener("click", closePickHistory);
+  $("pickHistoryBackdrop")?.addEventListener("click", closePickHistory);
+
+  $("backToLockerBtn")?.addEventListener("click", showWelcomePage);
 
   $("welcomeLeaderboardBtn")?.addEventListener("click", () => {
     showPickPage();
@@ -658,8 +725,9 @@ async function loadSharedData() {
     return;
   }
 
-  usedTeams = (myPicks || []).map(item => item.team_abbr);
-  currentPick = (myPicks || []).find(item => item.week === settings.current_week) || null;
+  myPickHistory = myPicks || [];
+  usedTeams = myPickHistory.map(item => item.team_abbr);
+  currentPick = myPickHistory.find(item => item.week === settings.current_week) || null;
   renderCurrentPickCard();
   renderWelcomePage(myPicks || []);
 
