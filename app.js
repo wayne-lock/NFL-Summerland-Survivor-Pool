@@ -1,3 +1,12 @@
+
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = $("removePlayerModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.style.display = "none";
+  }
+});
+
 const C = window.POOL_CONFIG || {};
 const configured =
   C.SUPABASE_URL &&
@@ -1306,12 +1315,20 @@ window.openRemovePlayer = profileId => {
   const displayName = player.nickname || `${player.first_name || ""} ${player.last_name || ""}`.trim() || "this player";
   $("removePlayerMessage").textContent =
     `Remove ${displayName} completely from Season of the Survivors? It will be as if this player never joined the pool.`;
-  $("removePlayerModal")?.classList.remove("hidden");
+  const modal = $("removePlayerModal");
+  if (modal) {
+    modal.classList.remove("hidden");
+    modal.style.display = "grid";
+  }
 };
 
 function closeRemovePlayerModal() {
   pendingRemovePlayerId = null;
-  $("removePlayerModal")?.classList.add("hidden");
+  const modal = $("removePlayerModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.style.display = "none";
+  }
 }
 
 $("cancelRemovePlayerBtn")?.addEventListener("click", closeRemovePlayerModal);
