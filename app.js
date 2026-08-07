@@ -1,12 +1,3 @@
-
-document.addEventListener("DOMContentLoaded", () => {
-  const modal = $("removePlayerModal");
-  if (modal) {
-    modal.classList.add("hidden");
-    modal.style.display = "none";
-  }
-});
-
 const C = window.POOL_CONFIG || {};
 const configured =
   C.SUPABASE_URL &&
@@ -1317,8 +1308,9 @@ window.openRemovePlayer = profileId => {
     `Remove ${displayName} completely from Season of the Survivors? It will be as if this player never joined the pool.`;
   const modal = $("removePlayerModal");
   if (modal) {
+    modal.hidden = false;
     modal.classList.remove("hidden");
-    modal.style.display = "grid";
+    modal.style.setProperty("display", "grid", "important");
   }
 };
 
@@ -1326,8 +1318,9 @@ function closeRemovePlayerModal() {
   pendingRemovePlayerId = null;
   const modal = $("removePlayerModal");
   if (modal) {
+    modal.hidden = true;
     modal.classList.add("hidden");
-    modal.style.display = "none";
+    modal.style.setProperty("display", "none", "important");
   }
 }
 
@@ -1434,6 +1427,14 @@ async function finalizeWeek() {
   );
 
   await loadApp({ id: me.id });
+}
+
+
+const removePlayerModalAtBoot = $("removePlayerModal");
+if (removePlayerModalAtBoot) {
+  removePlayerModalAtBoot.hidden = true;
+  removePlayerModalAtBoot.classList.add("hidden");
+  removePlayerModalAtBoot.style.setProperty("display", "none", "important");
 }
 
 boot();
