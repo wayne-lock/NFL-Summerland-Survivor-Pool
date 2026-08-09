@@ -902,10 +902,17 @@ async function loadSchedule() {
       const home = competition.competitors.find(team => team.homeAway === "home");
       const away = competition.competitors.find(team => team.homeAway === "away");
 
+      const postedOdds = Array.isArray(competition.odds) ? competition.odds[0] : null;
+      const spreadText =
+        postedOdds?.details ||
+        postedOdds?.displayValue ||
+        null;
+
       return {
         id: event.id,
         date: event.date,
         completed: event.status.type.completed,
+        spread: spreadText,
         home: {
           abbr: home.team.abbreviation,
           name: home.team.displayName,
@@ -939,6 +946,9 @@ function renderGames() {
   $("games").innerHTML = games.map(game => `
     <div class="game">
       <div class="game-time">${new Date(game.date).toLocaleString()}</div>
+      <div class="game-spread" style="text-align:center;font-size:.9rem;font-weight:800;letter-spacing:.06em;margin:.35rem 0 .65rem;">
+        SPREAD: ${game.spread ? esc(game.spread) : "Not posted"}
+      </div>
       <div class="matchup">
         ${teamCard(game.away, "AWAY TEAM", false, game)}
         <div class="at"><b>AT</b></div>
