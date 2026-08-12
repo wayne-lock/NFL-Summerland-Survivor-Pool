@@ -753,6 +753,23 @@ async function loadSharedData() {
   }
 }
 
+function publicPlayerName(player) {
+  const first = (player.first_name || "").trim();
+  const last = (player.last_name || "").trim();
+  const base = first || player.nickname || "Survivor";
+
+  if (!first) return base;
+
+  const duplicateFirstName = allProfiles.some(other =>
+    other.id !== player.id &&
+    (other.first_name || "").trim().toLowerCase() === first.toLowerCase()
+  );
+
+  return duplicateFirstName && last
+    ? `${first} ${last.charAt(0).toUpperCase()}.`
+    : first;
+}
+
 function renderSurvivorList(elementId, players, onBench) {
   const target = $(elementId);
 
@@ -770,9 +787,16 @@ function renderSurvivorList(elementId, players, onBench) {
 
     return `
       <div class="survivor-row">
-        <div class="survivor-name">
+        <div class="survivor-name" style="display:flex;align-items:center;gap:.65rem;min-width:0;">
           <div class="mini-avatar">${characterMarkup(player.avatar, "mini-character-image")}</div>
-          <strong>${esc(player.nickname)}</strong>
+          <div style="min-width:0;">
+            <strong style="display:block !important;color:#ffffff !important;font-size:1rem !important;line-height:1.15 !important;visibility:visible !important;opacity:1 !important;">
+              ${esc(publicPlayerName(player))}
+            </strong>
+            ${player.nickname && player.nickname !== publicPlayerName(player)
+              ? `<div class="small" style="display:block !important;color:#d6b35a !important;margin-top:.12rem;">${esc(player.nickname)}</div>`
+              : ""}
+          </div>
         </div>
         ${badge}
       </div>
