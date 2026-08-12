@@ -790,7 +790,7 @@ function renderSurvivorList(elementId, players, onBench) {
         <div class="survivor-name" style="display:flex;align-items:center;gap:.65rem;min-width:0;">
           <div class="mini-avatar">${characterMarkup(player.avatar, "mini-character-image")}</div>
           <div style="min-width:0;">
-            <strong style="display:block !important;color:#ffffff !important;font-size:1rem !important;line-height:1.15 !important;visibility:visible !important;opacity:1 !important;">
+            <strong style="display:block !important;color:#d71920 !important;font-size:1rem !important;line-height:1.15 !important;visibility:visible !important;opacity:1 !important;">
               ${esc(publicPlayerName(player))}
             </strong>
             ${player.nickname && player.nickname !== publicPlayerName(player)
