@@ -93,6 +93,7 @@ $("loginTab").onclick = () => switchAuth(true);
 $("signupTab").onclick = () => switchAuth(false);
 
 $("welcomeSmashTalkBtn")?.addEventListener("click", openSmashTalk);
+$("commissionerSmashTalkBtn")?.addEventListener("click", openSmashTalk);
 $("appSmashTalkBtn")?.addEventListener("click", openSmashTalk);
 $("closeSmashTalkBtn")?.addEventListener("click", closeSmashTalk);
 $("refreshSmashTalkBtn")?.addEventListener("click", loadSmashTalk);
