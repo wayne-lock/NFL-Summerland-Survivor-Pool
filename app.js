@@ -23,6 +23,7 @@ let myPickHistory = [];
 let pickCountdownTimer = null;
 let playerNameCheckTimer = null;
 let playerNameAvailable = false;
+let smashTalkPosts = [];
 
 const CHARACTER_CHOICES = [{"id":"clutch-chris","name":"Clutch Chris","group":"men","skin":"#D9A06C","hair":"#3A241B","clothing":"#123A63","accent":"#D5A62A","style":"jersey"},{"id":"sunday-sniper","name":"Sunday Sniper","group":"men","skin":"#B97850","hair":"#151515","clothing":"#17191D","accent":"#D6AE42","style":"hoodie"},{"id":"gridiron-gary","name":"Gridiron Gary","group":"men","skin":"#E0AE7A","hair":"#6A3922","clothing":"#263E58","accent":"#E0B440","style":"varsity"},{"id":"the-general","name":"The General","group":"men","skin":"#9E6448","hair":"#27211D","clothing":"#2C2F33","accent":"#D0A43A","style":"coach"},{"id":"ice-man","name":"Ice Man","group":"men","skin":"#F0C59A","hair":"#8A6B58","clothing":"#D9E0E5","accent":"#52748F","style":"winter"},{"id":"blitz-ben","name":"Blitz Ben","group":"men","skin":"#6F442E","hair":"#17110E","clothing":"#7A1F25","accent":"#DBA92E","style":"athletic"},{"id":"fourth-and-long","name":"Fourth & Long","group":"men","skin":"#C98B5D","hair":"#5A3427","clothing":"#2B5A3B","accent":"#E1C36A","style":"practice"},{"id":"captain-jack","name":"Captain Jack","group":"men","skin":"#E3B88F","hair":"#2B201B","clothing":"#244F7A","accent":"#E1B53C","style":"captain"},{"id":"raven-queen","name":"Raven Queen","group":"women","skin":"#A86A50","hair":"#281A2D","clothing":"#4A2868","accent":"#D6AC40","style":"jacket"},{"id":"touchdown-tina","name":"Touchdown Tina","group":"women","skin":"#E1AD80","hair":"#A9673D","clothing":"#932D35","accent":"#F0C45B","style":"jersey"},{"id":"victory-vicki","name":"Victory Vicki","group":"women","skin":"#F0C19A","hair":"#D1A169","clothing":"#315C8C","accent":"#D9B141","style":"fan"},{"id":"end-zone-emma","name":"End Zone Emma","group":"women","skin":"#7C4A34","hair":"#191514","clothing":"#285A46","accent":"#E0B443","style":"hoodie"},{"id":"blitz-bella","name":"Blitz Bella","group":"women","skin":"#C78664","hair":"#4A2D22","clothing":"#C06426","accent":"#F0C45B","style":"athletic"},{"id":"captain-kate","name":"Captain Kate","group":"women","skin":"#E8B68D","hair":"#35201B","clothing":"#262B31","accent":"#D4AB3C","style":"coach"},{"id":"gridiron-grace","name":"Gridiron Grace","group":"women","skin":"#5E392B","hair":"#19100E","clothing":"#F0EEE5","accent":"#D7A72C","style":"jersey"},{"id":"saints-sweetie","name":"Saints Sweetie","group":"women","skin":"#D89C76","hair":"#8B593F","clothing":"#182F4D","accent":"#DAB241","style":"supporter"}];
 const LEGACY_AVATARS = new Set(["🏈","🦬","🦅","🐻","🦁","🐺","🦈","🐂","⚡","🔥","🚀","⭐","🏆","👑","🛡️","🎯","🤠","😎","🧙","🥷"]);
@@ -90,6 +91,21 @@ if (!configured) $("setupWarning").classList.remove("hidden");
 
 $("loginTab").onclick = () => switchAuth(true);
 $("signupTab").onclick = () => switchAuth(false);
+
+$("welcomeSmashTalkBtn")?.addEventListener("click", openSmashTalk);
+$("appSmashTalkBtn")?.addEventListener("click", openSmashTalk);
+$("closeSmashTalkBtn")?.addEventListener("click", closeSmashTalk);
+$("refreshSmashTalkBtn")?.addEventListener("click", loadSmashTalk);
+$("smashTalkForm")?.addEventListener("submit", submitSmashTalk);
+$("smashTalkMessage")?.addEventListener("input", event => {
+  if ($("smashTalkCount")) {
+    $("smashTalkCount").textContent = `${event.target.value.length} / 250`;
+  }
+});
+$("smashTalkModal")?.addEventListener("click", event => {
+  if (event.target === $("smashTalkModal")) closeSmashTalk();
+});
+
 $("logoutBtn").onclick = async () => {
   if (!sb) return;
   await sb.auth.signOut();
@@ -378,6 +394,141 @@ function showCommissionerPage() {
   requestAnimationFrame(() => {
     $("commissionerPanel")?.scrollIntoView({ behavior: "auto", block: "start" });
   });
+}
+
+
+function formatSmashTalkTime(value) {
+  if (!value) return "";
+  return new Date(value).toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function openSmashTalk() {
+  const modal = $("smashTalkModal");
+  if (!modal || !me) return;
+  modal.hidden = false;
+  modal.style.setProperty("display", "block", "important");
+  $("smashTalkMessage")?.focus();
+  loadSmashTalk();
+}
+
+function closeSmashTalk() {
+  const modal = $("smashTalkModal");
+  if (!modal) return;
+  modal.hidden = true;
+  modal.style.setProperty("display", "none", "important");
+}
+
+async function loadSmashTalk() {
+  const feed = $("smashTalkFeed");
+  if (!feed || !sb) return;
+
+  feed.innerHTML = `<p style="text-align:center;color:#667085;">Loading Smash Talk...</p>`;
+
+  const { data, error } = await sb
+    .from("smash_talk")
+    .select("id,user_id,message,created_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    feed.innerHTML = `<p style="color:#b42318;text-align:center;">Smash Talk is not ready yet. The Commissioner may need to run the Smash Talk database setup.</p>`;
+    return;
+  }
+
+  smashTalkPosts = data || [];
+
+  if (!smashTalkPosts.length) {
+    feed.innerHTML = `<div style="background:white;border:1px solid #dfe4ea;border-radius:14px;padding:22px;text-align:center;"><strong>No Smash Talk yet.</strong><div style="color:#667085;margin-top:5px;">Be the first to make some noise.</div></div>`;
+    return;
+  }
+
+  feed.innerHTML = smashTalkPosts.map(post => {
+    const player = allProfiles.find(p => p.id === post.user_id);
+    const playerName = player ? publicPlayerName(player) : "Former Survivor";
+    const avatar = player ? characterMarkup(player.avatar, "mini-character-image") : `<span style="font-size:2rem;">🏈</span>`;
+    const nickname = player?.nickname && player.nickname !== playerName
+      ? `<div style="font-size:.8rem;color:#9a7418;font-weight:800;margin-top:2px;">${esc(player.nickname)}</div>`
+      : "";
+
+    const deleteButton = me?.is_admin
+      ? `<button type="button" data-smash-delete="${post.id}" style="border:1px solid #d92d20;background:white;color:#b42318;border-radius:7px;padding:6px 9px;font-weight:800;cursor:pointer;">DELETE</button>`
+      : "";
+
+    return `
+      <article style="background:white;border:1px solid #dfe4ea;border-radius:14px;padding:14px;margin-bottom:10px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex:0 0 52px;overflow:hidden;border-radius:12px;background:#eef1f5;">${avatar}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+              <div>
+                <strong style="color:#c51f1a;font-size:1.05rem;">${esc(playerName)}</strong>
+                ${nickname}
+                <div style="font-size:.78rem;color:#667085;margin-top:3px;">${esc(formatSmashTalkTime(post.created_at))}</div>
+              </div>
+              ${deleteButton}
+            </div>
+            <div style="margin-top:10px;color:#182230;font-size:1rem;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere;">${esc(post.message)}</div>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  feed.querySelectorAll("[data-smash-delete]").forEach(button => {
+    button.onclick = async () => {
+      if (!me?.is_admin) return;
+      if (!confirm("Delete this Smash Talk post?")) return;
+
+      const { error } = await sb
+        .from("smash_talk")
+        .delete()
+        .eq("id", button.dataset.smashDelete);
+
+      if (error) {
+        msg("smashTalkStatus", error, true);
+        return;
+      }
+
+      msg("smashTalkStatus", "Post deleted.");
+      await loadSmashTalk();
+    };
+  });
+}
+
+async function submitSmashTalk(event) {
+  event.preventDefault();
+  const input = $("smashTalkMessage");
+  if (!input || !me || !sb) return;
+
+  const message = input.value.trim();
+  if (!message || message.length > 250) {
+    msg("smashTalkStatus", "Enter a message up to 250 characters.", true);
+    return;
+  }
+
+  const submitButton = event.currentTarget.querySelector('button[type="submit"]');
+  if (submitButton) submitButton.disabled = true;
+
+  const { error } = await sb
+    .from("smash_talk")
+    .insert({ user_id: me.id, message });
+
+  if (submitButton) submitButton.disabled = false;
+
+  if (error) {
+    msg("smashTalkStatus", error, true);
+    return;
+  }
+
+  input.value = "";
+  if ($("smashTalkCount")) $("smashTalkCount").textContent = "0 / 250";
+  msg("smashTalkStatus", "Posted.");
+  await loadSmashTalk();
 }
 
 async function loadApp(user) {
