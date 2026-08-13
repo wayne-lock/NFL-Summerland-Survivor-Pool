@@ -888,7 +888,9 @@ async function loadSharedData() {
   }
 
   myPickHistory = myPicks || [];
-  usedTeams = myPickHistory.map(item => item.team_abbr);
+  usedTeams = myPickHistory
+    .filter(item => item.result === "win" || item.result === "loss")
+    .map(item => item.team_abbr);
   currentPick = myPickHistory.find(item => item.week === settings.current_week) || null;
   renderCurrentPickCard();
   renderWelcomePage(myPicks || []);
@@ -1109,7 +1111,7 @@ async function loadSchedule() {
     msg(
       "pickStatus",
       games.length
-        ? "Select one unused team to win."
+        ? "Select one team to win. A team becomes unavailable only after its picked game is completed."
         : "The schedule is not available yet.",
       !games.length
     );
