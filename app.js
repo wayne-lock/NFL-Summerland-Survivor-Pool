@@ -513,7 +513,7 @@ async function loadSurvivorResults() {
 
     return `
       <tr>
-        <td style="position:sticky;left:0;z-index:2;background:white;padding:10px 12px;min-width:170px;border-bottom:1px solid #eaecf0;box-shadow:2px 0 0 #eef0f3;">
+        <td style="position:sticky;left:0;z-index:2;background:white;padding:10px 8px;min-width:120px;border-bottom:1px solid #eaecf0;box-shadow:2px 0 0 #eef0f3;">
           <div style="display:flex;align-items:center;gap:9px;">
             <div style="width:42px;height:42px;flex:0 0 42px;border-radius:10px;overflow:hidden;background:#eef1f5;display:flex;align-items:center;justify-content:center;">
               ${characterMarkup(player.avatar, "mini-character-image")}
@@ -533,7 +533,7 @@ async function loadSurvivorResults() {
     <table style="width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;">
       <thead>
         <tr>
-          <th style="position:sticky;left:0;z-index:4;background:#101d31;color:white;padding:12px 14px;text-align:left;min-width:170px;border-bottom:2px solid #c69a2b;">SURVIVOR</th>
+          <th style="position:sticky;left:0;z-index:4;background:#101d31;color:white;padding:12px 10px;text-align:left;min-width:120px;border-bottom:2px solid #c69a2b;">SURVIVOR</th>
           ${headerCells}
           <th style="padding:12px 14px;white-space:nowrap;text-align:center;background:#101d31;color:white;border-bottom:2px solid #c69a2b;border-left:1px solid #344054;">STATUS</th>
         </tr>
