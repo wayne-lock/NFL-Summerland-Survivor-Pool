@@ -163,6 +163,7 @@
     <nav class="welcome-nav" aria-label="Player navigation">
       <button id="welcomeHowToPlayBtn" type="button">HOW TO PLAY</button>
       <button id="welcomeLeaderboardBtn" type="button">LEADERBOARD</button>
+      <button id="welcomeResultsBtn" type="button">SURVIVOR RESULTS</button>
       <button id="welcomeSmashTalkBtn" type="button">SMASH TALK</button>
       <button id="welcomeLockerBtn" type="button">MY LOCKER</button>
       <button id="welcomeSignOutBtn" type="button">SIGN OUT</button>
@@ -188,6 +189,7 @@
       <button id="backToLockerBtn" type="button" class="back-to-locker-button">
         <span aria-hidden="true">←</span> BACK TO MY LOCKER
       </button>
+      <button id="appResultsBtn" type="button" class="back-to-locker-button">SURVIVOR RESULTS</button>
       <button id="appSmashTalkBtn" type="button" class="back-to-locker-button">SMASH TALK</button>
     </div>
     <div class="game-day-strip"><span>GAME DAY CONTROL</span><strong>Season of the Survivors</strong></div>
@@ -231,7 +233,8 @@
 
     <section id="commissionerPanel" class="panel hidden">
       <div class="section-title-row"><div><div class="eyebrow dark">GAME CONTROL</div><h2>Commissioner Command Centre</h2>
-      <div style="margin:12px 0 18px;">
+      <div style="margin:12px 0 18px;display:flex;gap:.7rem;flex-wrap:wrap;">
+        <button id="commissionerResultsBtn" type="button" class="secondary">SURVIVOR RESULTS</button>
         <button id="commissionerSmashTalkBtn" type="button" class="secondary">SMASH TALK</button>
       </div></div><span class="live-chip"><i></i> LIVE</span></div>
 
@@ -376,7 +379,7 @@
   </section>
 </main>
 
-<footer><strong>Season of the Survivors</strong><span>Version 3.5.7.2 Team Lock Rule</span></footer>
+<footer><strong>Season of the Survivors</strong><span>Version 3.5.8 Survivor Results</span></footer>
 
 <div id="removePlayerModal" class="remove-player-modal hidden" hidden style="display:none !important;" role="dialog" aria-modal="true" aria-labelledby="removePlayerTitle">
     <div class="remove-player-backdrop"></div>
@@ -423,7 +426,25 @@
   </div>
 
 
+
+  <div id="survivorResultsModal" hidden style="display:none !important;position:fixed;inset:0;z-index:10020;background:rgba(4,10,20,.86);padding:16px;overflow:auto;" role="dialog" aria-modal="true" aria-labelledby="survivorResultsTitle">
+    <section style="max-width:1180px;margin:24px auto;background:#f7f8fb;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.5);overflow:hidden;">
+      <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:#101d31;color:white;padding:18px 20px;border-bottom:4px solid #c69a2b;">
+        <h2 id="survivorResultsTitle" style="margin:0;font-size:1.7rem;letter-spacing:.06em;">SURVIVOR RESULTS</h2>
+        <button id="closeSurvivorResultsBtn" type="button" aria-label="Close Survivor Results" style="border:0;background:transparent;color:white;font-size:2rem;line-height:1;cursor:pointer;">×</button>
+      </header>
+
+      <div style="padding:16px 16px 20px;">
+        <div id="survivorResultsStatus" style="font-size:.9rem;color:#667085;margin:0 0 10px;"></div>
+        <div id="survivorResultsTableWrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch;background:white;border:1px solid #dfe4ea;border-radius:14px;">
+          <div id="survivorResultsTable" style="min-width:100%;"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
 <script src="config.js"></script>
-<script src="app.js?v=3572"></script>
+<script src="app.js?v=3580"></script>
 </body>
 </html>

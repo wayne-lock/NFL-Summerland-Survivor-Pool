@@ -92,6 +92,13 @@ if (!configured) $("setupWarning").classList.remove("hidden");
 $("loginTab").onclick = () => switchAuth(true);
 $("signupTab").onclick = () => switchAuth(false);
 
+$("welcomeResultsBtn")?.addEventListener("click", openSurvivorResults);
+$("appResultsBtn")?.addEventListener("click", openSurvivorResults);
+$("commissionerResultsBtn")?.addEventListener("click", openSurvivorResults);
+$("closeSurvivorResultsBtn")?.addEventListener("click", closeSurvivorResults);
+$("survivorResultsModal")?.addEventListener("click", event => {
+  if (event.target === $("survivorResultsModal")) closeSurvivorResults();
+});
 $("welcomeSmashTalkBtn")?.addEventListener("click", openSmashTalk);
 $("commissionerSmashTalkBtn")?.addEventListener("click", openSmashTalk);
 $("appSmashTalkBtn")?.addEventListener("click", openSmashTalk);
@@ -397,6 +404,147 @@ function showCommissionerPage() {
   });
 }
 
+
+
+function openSurvivorResults() {
+  const modal = $("survivorResultsModal");
+  if (!modal || !me || !settings) return;
+
+  modal.hidden = false;
+  modal.style.setProperty("display", "block", "important");
+  loadSurvivorResults();
+}
+
+function closeSurvivorResults() {
+  const modal = $("survivorResultsModal");
+  if (!modal) return;
+
+  modal.hidden = true;
+  modal.style.setProperty("display", "none", "important");
+}
+
+function survivorResultsCell(pick) {
+  if (!pick) {
+    return `<span style="color:#98a2b3;font-weight:800;">—</span>`;
+  }
+
+  const result = String(pick.result || "pending").toLowerCase();
+  const kickoff = pick.game_kickoff ? new Date(pick.game_kickoff).getTime() : null;
+  const hasStarted = kickoff ? Date.now() >= kickoff : result === "win" || result === "loss";
+
+  // Do not reveal a future pick before its game starts.
+  if (result === "pending" && !hasStarted) {
+    return `<span style="color:#98a2b3;font-weight:800;">—</span>`;
+  }
+
+  const team = esc(pick.team_abbr || pick.team_name || "—");
+
+  if (result === "win") {
+    return `<strong style="color:#16803a;font-size:1rem;">${team}</strong>`;
+  }
+
+  if (result === "loss") {
+    return `<strong style="color:#d71920;font-size:1rem;">${team}</strong>`;
+  }
+
+  return `<strong style="color:#667085;font-size:1rem;">${team}</strong>`;
+}
+
+async function loadSurvivorResults() {
+  const target = $("survivorResultsTable");
+  const status = $("survivorResultsStatus");
+  if (!target || !status || !sb || !settings) return;
+
+  target.innerHTML = `<div style="padding:26px;text-align:center;color:#667085;">Loading Survivor Results...</div>`;
+  status.textContent = "";
+
+  const currentWeek = Math.max(1, Number(settings.current_week || 1));
+
+  const { data: picks, error } = await sb
+    .from("picks")
+    .select("id,user_id,week,team_abbr,team_name,game_kickoff,result")
+    .lte("week", currentWeek)
+    .order("week");
+
+  if (error) {
+    target.innerHTML = `<div style="padding:26px;text-align:center;color:#b42318;">Survivor Results could not be loaded.</div>`;
+    return;
+  }
+
+  const weeks = Array.from({ length: currentWeek }, (_, index) => index + 1);
+  const picksByPlayer = new Map();
+
+  (picks || []).forEach(pick => {
+    if (!picksByPlayer.has(pick.user_id)) picksByPlayer.set(pick.user_id, new Map());
+    picksByPlayer.get(pick.user_id).set(Number(pick.week), pick);
+  });
+
+  const players = [...allProfiles].sort((a, b) =>
+    publicPlayerName(a).localeCompare(publicPlayerName(b))
+  );
+
+  const headerCells = weeks.map(week => {
+    const current = week === currentWeek;
+    return `
+      <th style="padding:12px 14px;white-space:nowrap;text-align:center;background:${current ? "#fff4cc" : "#f2f4f7"};border-bottom:2px solid #d0d5dd;border-left:1px solid #e4e7ec;color:#344054;font-size:.86rem;">
+        WEEK ${week}
+      </th>
+    `;
+  }).join("");
+
+  const rows = players.map(player => {
+    const playerPicks = picksByPlayer.get(player.id) || new Map();
+    const resultCells = weeks.map(week => {
+      const current = week === currentWeek;
+      return `
+        <td style="padding:13px 14px;min-width:82px;text-align:center;border-bottom:1px solid #eaecf0;border-left:1px solid #f0f1f3;background:${current ? "#fffaf0" : "white"};">
+          ${survivorResultsCell(playerPicks.get(week))}
+        </td>
+      `;
+    }).join("");
+
+    const statusText = player.eliminated
+      ? "ON THE BENCH"
+      : Number(player.losses || 0) === 2
+        ? "FINAL MULLIGAN"
+        : "STILL IN";
+
+    const statusColor = player.eliminated ? "#d71920" : "#16803a";
+
+    return `
+      <tr>
+        <td style="position:sticky;left:0;z-index:2;background:white;padding:10px 12px;min-width:170px;border-bottom:1px solid #eaecf0;box-shadow:2px 0 0 #eef0f3;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <div style="width:42px;height:42px;flex:0 0 42px;border-radius:10px;overflow:hidden;background:#eef1f5;display:flex;align-items:center;justify-content:center;">
+              ${characterMarkup(player.avatar, "mini-character-image")}
+            </div>
+            <strong style="color:#d71920;font-size:.96rem;line-height:1.1;">${esc(publicPlayerName(player))}</strong>
+          </div>
+        </td>
+        ${resultCells}
+        <td style="padding:12px 14px;min-width:125px;text-align:center;border-bottom:1px solid #eaecf0;border-left:1px solid #f0f1f3;background:white;">
+          <strong style="color:${statusColor};font-size:.82rem;white-space:nowrap;">${statusText}</strong>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  target.innerHTML = `
+    <table style="width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;">
+      <thead>
+        <tr>
+          <th style="position:sticky;left:0;z-index:4;background:#101d31;color:white;padding:12px 14px;text-align:left;min-width:170px;border-bottom:2px solid #c69a2b;">SURVIVOR</th>
+          ${headerCells}
+          <th style="padding:12px 14px;white-space:nowrap;text-align:center;background:#101d31;color:white;border-bottom:2px solid #c69a2b;border-left:1px solid #344054;">STATUS</th>
+        </tr>
+      </thead>
+      <tbody>${rows || `<tr><td colspan="${weeks.length + 2}" style="padding:24px;text-align:center;">No survivors yet.</td></tr>`}</tbody>
+    </table>
+  `;
+
+  status.textContent =
+    `Through Week ${currentWeek}. Green = win. Red = loss. Picks are not shown before kickoff.`;
+}
 
 function formatSmashTalkTime(value) {
   if (!value) return "";
