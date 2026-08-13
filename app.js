@@ -486,7 +486,7 @@ async function loadSurvivorResults() {
   const headerCells = weeks.map(week => {
     const current = week === currentWeek;
     return `
-      <th style="padding:12px 14px;white-space:nowrap;text-align:center;background:${current ? "#fff4cc" : "#f2f4f7"};border-bottom:2px solid #d0d5dd;border-left:1px solid #e4e7ec;color:#344054;font-size:.86rem;">
+      <th style="padding:10px 8px;white-space:nowrap;text-align:center;background:${current ? "#fff4cc" : "#f2f4f7"};border-bottom:2px solid #d0d5dd;border-left:1px solid #e4e7ec;color:#344054;font-size:.86rem;">
         WEEK ${week}
       </th>
     `;
@@ -497,7 +497,7 @@ async function loadSurvivorResults() {
     const resultCells = weeks.map(week => {
       const current = week === currentWeek;
       return `
-        <td style="padding:13px 14px;min-width:82px;text-align:center;border-bottom:1px solid #eaecf0;border-left:1px solid #f0f1f3;background:${current ? "#fffaf0" : "white"};">
+        <td style="padding:11px 8px;min-width:62px;text-align:center;border-bottom:1px solid #eaecf0;border-left:1px solid #f0f1f3;background:${current ? "#fffaf0" : "white"};">
           ${survivorResultsCell(playerPicks.get(week))}
         </td>
       `;
@@ -513,8 +513,8 @@ async function loadSurvivorResults() {
 
     return `
       <tr>
-        <td style="position:sticky;left:0;z-index:2;background:white;padding:10px 8px;min-width:120px;border-bottom:1px solid #eaecf0;box-shadow:2px 0 0 #eef0f3;">
-          <div style="display:flex;align-items:center;gap:9px;">
+        <td style="position:sticky;left:0;z-index:2;background:white;padding:10px 8px;min-width:96px;border-bottom:1px solid #eaecf0;box-shadow:2px 0 0 #eef0f3;">
+          <div style="display:flex;align-items:center;gap:6px;">
             <div style="width:42px;height:42px;flex:0 0 42px;border-radius:10px;overflow:hidden;background:#eef1f5;display:flex;align-items:center;justify-content:center;">
               ${characterMarkup(player.avatar, "mini-character-image")}
             </div>
@@ -522,7 +522,7 @@ async function loadSurvivorResults() {
           </div>
         </td>
         ${resultCells}
-        <td style="padding:12px 14px;min-width:125px;text-align:center;border-bottom:1px solid #eaecf0;border-left:1px solid #f0f1f3;background:white;">
+        <td style="padding:11px 8px;min-width:100px;text-align:center;border-bottom:1px solid #eaecf0;border-left:1px solid #f0f1f3;background:white;">
           <strong style="color:${statusColor};font-size:.82rem;white-space:nowrap;">${statusText}</strong>
         </td>
       </tr>
@@ -533,9 +533,9 @@ async function loadSurvivorResults() {
     <table style="width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;">
       <thead>
         <tr>
-          <th style="position:sticky;left:0;z-index:4;background:#101d31;color:white;padding:12px 10px;text-align:left;min-width:120px;border-bottom:2px solid #c69a2b;">SURVIVOR</th>
+          <th style="position:sticky;left:0;z-index:4;background:#101d31;color:white;padding:12px 10px;text-align:left;min-width:96px;border-bottom:2px solid #c69a2b;">SURVIVOR</th>
           ${headerCells}
-          <th style="padding:12px 14px;white-space:nowrap;text-align:center;background:#101d31;color:white;border-bottom:2px solid #c69a2b;border-left:1px solid #344054;">STATUS</th>
+          <th style="padding:10px 8px;white-space:nowrap;text-align:center;background:#101d31;color:white;border-bottom:2px solid #c69a2b;border-left:1px solid #344054;">STATUS</th>
         </tr>
       </thead>
       <tbody>${rows || `<tr><td colspan="${weeks.length + 2}" style="padding:24px;text-align:center;">No survivors yet.</td></tr>`}</tbody>
