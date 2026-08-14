@@ -9,6 +9,36 @@
   <title>Season of the Survivors | Summerland NFL Pool</title>
   <link rel="stylesheet" href="styles.css?v=3541">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style id="singleSignInStyle">
+  .launch-hero .stadium-opening-actions .stadium-single-signin{
+    position:absolute;
+    left:28.4%;
+    top:76.8%;
+    width:44.4%;
+    height:14.3%;
+    z-index:5;
+    border:2px solid #d9aa3a;
+    border-radius:12px;
+    background:linear-gradient(180deg, rgba(19,39,69,.99), rgba(5,24,49,.99));
+    box-shadow:0 0 16px rgba(224,174,61,.38), inset 0 0 0 1px rgba(255,255,255,.08);
+    color:#fff;
+    font:inherit;
+    cursor:pointer;
+    text-transform:uppercase;
+  }
+  .launch-hero .stadium-opening-actions .stadium-single-signin span{
+    display:flex;
+    height:100%;
+    align-items:center;
+    justify-content:center;
+    font-size:clamp(18px,2.1vw,34px);
+    font-weight:900;
+    letter-spacing:.04em;
+    text-shadow:0 2px 3px rgba(0,0,0,.65);
+  }
+</style>
+
 </head>
 <body>
 <div class="stadium-scene" aria-hidden="true"><div class="stadium-glow glow-left"></div><div class="stadium-glow glow-right"></div><div class="field-lines"></div></div>
@@ -37,8 +67,7 @@
       <img class="stadium-opening-art" src="opening-stadium.png?v=352" alt="Season of the Survivors stadium opening page with championship crest and trophy">
       <div class="stadium-opening-actions" aria-label="Pool access options">
         <button type="button" class="stadium-hotspot stadium-join" aria-label="Join the Pool — create a new player account" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('signupTab').click(); document.getElementById('firstName').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});"><span>Join the Pool</span></button>
-        <button type="button" class="stadium-hotspot stadium-player" aria-label="Player Sign In — return to your locker" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});"><span>Player Sign In</span></button>
-        <button type="button" class="stadium-hotspot stadium-commissioner" aria-label="Commissioner Sign In — access the Command Centre" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});"><span>Commissioner Sign In</span></button>
+        <button type="button" class="stadium-hotspot stadium-single-signin" aria-label="Sign In — player or commissioner" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});"><span>Sign In</span></button>
       </div>
     </div>
 
@@ -52,8 +81,8 @@
       <form id="loginForm">
         <div class="form-heading">
           <div class="form-eyebrow">WELCOME BACK</div>
-          <h2>Player or Commissioner Sign In</h2>
-          <p>Enter your email and password to continue.</p>
+          <h2>Sign In</h2>
+          <p>Enter your email and password. We’ll take you to the right place.</p>
         </div>
         <label>Email</label>
         <input id="loginEmail" type="email" required autocomplete="email">
@@ -379,7 +408,7 @@
   </section>
 </main>
 
-<footer><strong>Season of the Survivors</strong><span>Version 3.5.8.3 Creator Credit</span></footer>
+<footer><strong>Season of the Survivors</strong><span>Version 3.5.8.4 Single Sign In</span></footer>
 
 <div id="removePlayerModal" class="remove-player-modal hidden" hidden style="display:none !important;" role="dialog" aria-modal="true" aria-labelledby="removePlayerTitle">
     <div class="remove-player-backdrop"></div>
@@ -445,7 +474,7 @@
 
 
 <script src="config.js"></script>
-<script src="app.js?v=3583"></script>
+<script src="app.js?v=3584"></script>
 
   <div id="creatorCredit" style="text-align:center;color:#9aa3af;font-size:.82rem;padding:10px 12px 18px;letter-spacing:.02em;">
     Season of the Survivors • Created by Wayne Lock
