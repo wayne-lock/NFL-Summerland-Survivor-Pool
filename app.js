@@ -1704,7 +1704,7 @@ function renderLockerRoom() {
       <div class="locker-actions">
         <button onclick="togglePaid('${player.id}', ${!player.paid})">${player.paid ? "Mark Unpaid":"Mark Paid"}</button>
         <button class="${player.eliminated ? "":"danger-btn"}" onclick="toggleBench('${player.id}', ${!player.eliminated})">${player.eliminated ? "Return to Game":"Move to Bench"}</button>
-        ${player.id !== me.id ? `<button type="button" class="remove-player-btn" data-remove-player-id="${player.id}">Remove Player</button>` : ""}
+        ${player.id !== me.id ? `<button type="button" class="remove-player-btn" onclick="window.openRemovePlayer('${player.id}'); return false;">Remove Player</button>` : ""}
       </div>
     </div>`).join("") : '<p class="small">No survivors have joined yet.</p>';
 }
@@ -1725,32 +1725,64 @@ window.toggleBench = async (profileId, eliminated) => {
 let pendingRemovePlayerId = null;
 
 window.openRemovePlayer = profileId => {
-  if (!me?.is_admin) return;
-  const player = allProfiles.find(item => item.id === profileId);
-  if (!player || player.id === me.id) return;
+  try {
+    if (!me?.is_admin) {
+      alert("Commissioner access required.");
+      return;
+    }
 
-  pendingRemovePlayerId = profileId;
-  const displayName = player.nickname || `${player.first_name || ""} ${player.last_name || ""}`.trim() || "this player";
-  $("removePlayerMessage").textContent =
-    `Remove ${displayName} completely from Season of the Survivors? It will be as if this player never joined the pool.`;
-  const modal = $("removePlayerModal");
-  if (modal) {
-    modal.hidden = false;
-    modal.setAttribute("aria-hidden", "false");
-    modal.classList.remove("hidden");
-    modal.style.setProperty("display", "grid", "important");
+    const player = allProfiles.find(item => item.id === profileId);
+
+    if (!player) {
+      alert("That player could not be found. Refresh the Commissioner page and try again.");
+      return;
+    }
+
+    if (player.id === me.id) {
+      alert("The Commissioner account cannot be removed here.");
+      return;
+    }
+
+    pendingRemovePlayerId = profileId;
+
+    const displayName =
+      player.nickname ||
+      `${player.first_name || ""} ${player.last_name || ""}`.trim() ||
+      "this player";
+
+    const modal = $("removePlayerModal");
+    const message = $("removePlayerMessage");
+
+    if (message) {
+      message.textContent =
+        `Remove ${displayName} completely from Season of the Survivors? It will be as if this player never joined the pool.`;
+    }
+
+    if (modal) {
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
+      modal.classList.remove("hidden");
+      modal.style.setProperty("display", "grid", "important");
+      modal.style.setProperty("visibility", "visible", "important");
+      modal.style.setProperty("opacity", "1", "important");
+      modal.style.setProperty("pointer-events", "auto", "important");
+      modal.style.setProperty("z-index", "99999", "important");
+      return;
+    }
+
+    // Fallback: if the custom dialog is missing, use the iPad/browser confirmation.
+    const proceed = window.confirm(
+      `Permanently remove ${displayName} from Season of the Survivors?\n\n` +
+      `This deletes the player, picks, history, invitation and login account.`
+    );
+
+    if (proceed) {
+      window.confirmRemovePlayerNow?.();
+    }
+  } catch (error) {
+    alert(`Remove Player error: ${error?.message || error}`);
   }
 };
-
-// Delegated handler keeps Remove Player working even though the locker list
-// is re-rendered dynamically after updates.
-document.addEventListener("click", event => {
-  const button = event.target.closest("[data-remove-player-id]");
-  if (!button) return;
-  event.preventDefault();
-  event.stopPropagation();
-  window.openRemovePlayer(button.dataset.removePlayerId);
-});
 
 function closeRemovePlayerModal() {
   pendingRemovePlayerId = null;
@@ -1766,22 +1798,31 @@ function closeRemovePlayerModal() {
 $("cancelRemovePlayerBtn")?.addEventListener("click", closeRemovePlayerModal);
 $("removePlayerModal")?.querySelector(".remove-player-backdrop")?.addEventListener("click", closeRemovePlayerModal);
 
-$("confirmRemovePlayerBtn")?.addEventListener("click", async () => {
+window.confirmRemovePlayerNow = async () => {
   const profileId = pendingRemovePlayerId;
-  if (!profileId || !me?.is_admin) return;
+
+  if (!profileId || !me?.is_admin) {
+    alert("No player is selected for removal.");
+    return;
+  }
 
   const button = $("confirmRemovePlayerBtn");
-  button.disabled = true;
-  button.textContent = "DELETING...";
+  if (button) {
+    button.disabled = true;
+    button.textContent = "DELETING...";
+  }
 
   const { error } = await sb.rpc("commissioner_delete_player_permanently", {
     p_profile_id: profileId
   });
 
-  button.disabled = false;
-  button.textContent = "DELETE PLAYER PERMANENTLY";
+  if (button) {
+    button.disabled = false;
+    button.textContent = "DELETE PLAYER PERMANENTLY";
+  }
 
   if (error) {
+    alert(`Player could not be removed: ${error.message || String(error)}`);
     msg("commissionerMessage", error.message || String(error), true);
     return;
   }
@@ -1789,7 +1830,9 @@ $("confirmRemovePlayerBtn")?.addEventListener("click", async () => {
   closeRemovePlayerModal();
   msg("commissionerMessage", "Player permanently removed. Player count and prize pool recalculated.");
   await loadSharedData();
-});
+};
+
+$("confirmRemovePlayerBtn")?.addEventListener("click", window.confirmRemovePlayerNow);
 
 function renderInvitations() {
   $("invitationList").innerHTML = allInvites.length ? allInvites.map(invite => {
