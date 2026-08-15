@@ -24,6 +24,8 @@ let pickCountdownTimer = null;
 let playerNameCheckTimer = null;
 let playerNameAvailable = false;
 let smashTalkPosts = [];
+let selectedPickWeek = null;
+let scheduleWeekLoaded = null;
 
 const CHARACTER_CHOICES = [{"id":"clutch-chris","name":"Clutch Chris","group":"men","skin":"#D9A06C","hair":"#3A241B","clothing":"#123A63","accent":"#D5A62A","style":"jersey"},{"id":"sunday-sniper","name":"Sunday Sniper","group":"men","skin":"#B97850","hair":"#151515","clothing":"#17191D","accent":"#D6AE42","style":"hoodie"},{"id":"gridiron-gary","name":"Gridiron Gary","group":"men","skin":"#E0AE7A","hair":"#6A3922","clothing":"#263E58","accent":"#E0B440","style":"varsity"},{"id":"the-general","name":"The General","group":"men","skin":"#9E6448","hair":"#27211D","clothing":"#2C2F33","accent":"#D0A43A","style":"coach"},{"id":"ice-man","name":"Ice Man","group":"men","skin":"#F0C59A","hair":"#8A6B58","clothing":"#D9E0E5","accent":"#52748F","style":"winter"},{"id":"blitz-ben","name":"Blitz Ben","group":"men","skin":"#6F442E","hair":"#17110E","clothing":"#7A1F25","accent":"#DBA92E","style":"athletic"},{"id":"fourth-and-long","name":"Fourth & Long","group":"men","skin":"#C98B5D","hair":"#5A3427","clothing":"#2B5A3B","accent":"#E1C36A","style":"practice"},{"id":"captain-jack","name":"Captain Jack","group":"men","skin":"#E3B88F","hair":"#2B201B","clothing":"#244F7A","accent":"#E1B53C","style":"captain"},{"id":"raven-queen","name":"Raven Queen","group":"women","skin":"#A86A50","hair":"#281A2D","clothing":"#4A2868","accent":"#D6AC40","style":"jacket"},{"id":"touchdown-tina","name":"Touchdown Tina","group":"women","skin":"#E1AD80","hair":"#A9673D","clothing":"#932D35","accent":"#F0C45B","style":"jersey"},{"id":"victory-vicki","name":"Victory Vicki","group":"women","skin":"#F0C19A","hair":"#D1A169","clothing":"#315C8C","accent":"#D9B141","style":"fan"},{"id":"end-zone-emma","name":"End Zone Emma","group":"women","skin":"#7C4A34","hair":"#191514","clothing":"#285A46","accent":"#E0B443","style":"hoodie"},{"id":"blitz-bella","name":"Blitz Bella","group":"women","skin":"#C78664","hair":"#4A2D22","clothing":"#C06426","accent":"#F0C45B","style":"athletic"},{"id":"captain-kate","name":"Captain Kate","group":"women","skin":"#E8B68D","hair":"#35201B","clothing":"#262B31","accent":"#D4AB3C","style":"coach"},{"id":"gridiron-grace","name":"Gridiron Grace","group":"women","skin":"#5E392B","hair":"#19100E","clothing":"#F0EEE5","accent":"#D7A72C","style":"jersey"},{"id":"saints-sweetie","name":"Saints Sweetie","group":"women","skin":"#D89C76","hair":"#8B593F","clothing":"#182F4D","accent":"#DAB241","style":"supporter"}];
 const LEGACY_AVATARS = new Set(["🏈","🦬","🦅","🐻","🦁","🐺","🦈","🐂","⚡","🔥","🚀","⭐","🏆","👑","🛡️","🎯","🤠","😎","🧙","🥷"]);
@@ -715,7 +717,9 @@ async function loadApp(user) {
   }
 
   settings = poolSettings;
+  selectedPickWeek = Number(settings.current_week || 1);
   $("seasonDisplay").textContent = settings.season;
+  setupPlayerWeekSelector();
 
   renderIdentity();
   await loadSharedData();
@@ -764,6 +768,7 @@ function renderWelcomePage(myPicks = null) {
   const mulligans = Math.max(0, 2 - losses);
   const pickHistory = Array.isArray(myPicks) ? myPicks : [];
   const wins = pickHistory.filter(pick => pick.result === "win").length;
+  const welcomeCurrentPick = pickHistory.find(pick => Number(pick.week) === Number(settings.current_week)) || null;
 
   $("welcomeAvatar").innerHTML = characterMarkup(me.avatar, "welcome-character-image");
   $("welcomePlayerName").textContent = me.nickname || "Survivor";
@@ -775,16 +780,17 @@ function renderWelcomePage(myPicks = null) {
 
   const week = Number(settings.current_week || 1);
   const nextKickoff = getNextAvailableKickoff();
-  const locked = isCurrentPickLocked() || settings.picks_open === false;
+  const currentWeekLockTime = welcomeCurrentPick?.game_kickoff ? getPickLockTime(welcomeCurrentPick.game_kickoff) : null;
+  const locked = Boolean(currentWeekLockTime && Date.now() >= currentWeekLockTime.getTime()) || settings.picks_open === false;
 
-  if (currentPick && locked) {
+  if (welcomeCurrentPick && locked) {
     $("welcomeWeekStatus").textContent = `YOUR WEEK ${week} PICK IS LOCKED IN`;
-    $("welcomeWeekMessage").textContent = `${currentPick.team_name} selected. Good luck this week!`;
+    $("welcomeWeekMessage").textContent = `${welcomeCurrentPick.team_name} selected. Good luck this week!`;
     $("enterPickPageBtn").textContent = "VIEW MY PICK";
-  } else if (currentPick) {
+  } else if (welcomeCurrentPick) {
     $("welcomeWeekStatus").textContent = `YOUR WEEK ${week} PICK IS READY`;
     $("welcomeWeekMessage").textContent =
-      `${currentPick.team_name} selected. You may change it before kickoff.`;
+      `${welcomeCurrentPick.team_name} selected. You may change it before kickoff.`;
     $("enterPickPageBtn").textContent = "VIEW OR CHANGE PICK";
   } else if (settings.picks_open === false) {
     $("welcomeWeekStatus").textContent = `WEEK ${week} PICKS ARE CLOSED`;
@@ -803,7 +809,7 @@ function renderWelcomePage(myPicks = null) {
   }
 
   const deadlineSource =
-    currentPick?.game_kickoff ||
+    welcomeCurrentPick?.game_kickoff ||
     nextKickoff?.toISOString?.() ||
     games.map(game => game.date).filter(Boolean).sort()[0] ||
     null;
@@ -860,6 +866,7 @@ function renderPickHistory() {
         <div class="pick-history-team">
           <strong>${esc(pick.team_name || pick.team_abbr || "Team")}</strong>
           <span>${esc(kickoff)}</span>
+          ${pick.spread_at_pick ? `<span>Spread when picked: ${esc(pick.spread_at_pick)}</span>` : ""}
         </div>
         <span class="pick-history-status ${status.className}">${status.label}</span>
       </article>
@@ -886,7 +893,15 @@ function bindWelcomePageControls() {
   $("closePickHistoryBtn")?.addEventListener("click", closePickHistory);
   $("pickHistoryBackdrop")?.addEventListener("click", closePickHistory);
 
-  $("backToLockerBtn")?.addEventListener("click", showWelcomePage);
+  $("backToLockerBtn")?.addEventListener("click", async () => {
+    selectedPickWeek = Number(settings.current_week);
+    if ($("playerWeekSelect")) $("playerWeekSelect").value = String(selectedPickWeek);
+    currentPick = myPickHistory.find(item => Number(item.week) === selectedPickWeek) || null;
+    updateSelectedWeekLabels();
+    await loadSchedule(selectedPickWeek);
+    renderCurrentPickCard();
+    showWelcomePage();
+  });
 
   $("welcomeLeaderboardBtn")?.addEventListener("click", () => {
     showPickPage();
@@ -990,13 +1005,68 @@ function renderIdentity() {
   };
 }
 
+
+function setupPlayerWeekSelector() {
+  const select = $("playerWeekSelect");
+  if (!select || !settings) return;
+
+  const currentWeek = Math.max(1, Number(settings.current_week || 1));
+  const previousValue = Number(selectedPickWeek || currentWeek);
+
+  select.innerHTML = Array.from(
+    { length: 19 - currentWeek },
+    (_, index) => currentWeek + index
+  ).map(week => `<option value="${week}">Week ${week}${week === currentWeek ? " — Current" : ""}</option>`).join("");
+
+  selectedPickWeek = Math.min(18, Math.max(currentWeek, previousValue));
+  select.value = String(selectedPickWeek);
+
+  updateSelectedWeekLabels();
+
+  select.onchange = async () => {
+    selectedPickWeek = Number(select.value);
+    currentPick = myPickHistory.find(item => Number(item.week) === selectedPickWeek) || null;
+    updateSelectedWeekLabels();
+    renderCurrentPickCard();
+    await loadSchedule(selectedPickWeek);
+  };
+}
+
+function updateSelectedWeekLabels() {
+  if (!settings) return;
+  const currentWeek = Number(settings.current_week || 1);
+  const selected = Number(selectedPickWeek || currentWeek);
+
+  if ($("pickPageWeekHeading")) $("pickPageWeekHeading").textContent = selected;
+
+  if ($("selectedWeekNote")) {
+    $("selectedWeekNote").textContent =
+      selected === currentWeek
+        ? `You are making your current Week ${selected} selection.`
+        : `You are planning ahead for Week ${selected}. You may change this pick until its selected game locks.`;
+  }
+}
+
+function selectedWeekPick() {
+  return myPickHistory.find(item => Number(item.week) === Number(selectedPickWeek)) || null;
+}
+
+function selectedPickIsInvalidBecauseTeamWasUsed() {
+  if (!currentPick?.team_abbr) return false;
+  return myPickHistory.some(item =>
+    Number(item.week) < Number(selectedPickWeek) &&
+    item.team_abbr === currentPick.team_abbr &&
+    (item.result === "win" || item.result === "loss")
+  );
+}
+
 async function loadSharedData() {
   const requests = [
     sb.from("profiles")
       .select("id,first_name,last_name,nickname,avatar,losses,eliminated,paid,is_admin,created_at")
       .order("created_at"),
     sb.from("picks")
-      .select("id,user_id,week,team_abbr,team_name,game_id,game_kickoff,result,auto_assigned,created_at,updated_at")
+      .select("id,user_id,week,team_abbr,team_name,game_id,game_kickoff,result,auto_assigned,spread_at_pick,created_at,updated_at")
       .eq("week", settings.current_week)
   ];
   if (me.is_admin) requests.push(sb.from("pool_invites").select("*").order("created_at", { ascending:false }));
@@ -1026,7 +1096,7 @@ async function loadSharedData() {
 
   const { data: myPicks, error: myPicksError } = await sb
     .from("picks")
-    .select("id,week,team_abbr,team_name,game_id,game_kickoff,result,auto_assigned,created_at,updated_at")
+    .select("id,week,team_abbr,team_name,game_id,game_kickoff,result,auto_assigned,spread_at_pick,created_at,updated_at")
     .eq("user_id", me.id)
     .order("week");
 
@@ -1039,7 +1109,7 @@ async function loadSharedData() {
   usedTeams = myPickHistory
     .filter(item => item.result === "win" || item.result === "loss")
     .map(item => item.team_abbr);
-  currentPick = myPickHistory.find(item => item.week === settings.current_week) || null;
+  currentPick = myPickHistory.find(item => Number(item.week) === Number(selectedPickWeek || settings.current_week)) || null;
   renderCurrentPickCard();
   renderWelcomePage(myPicks || []);
 
@@ -1132,12 +1202,14 @@ function formatRemaining(milliseconds) {
 function renderCurrentPickCard() {
   if (!$("currentPickCard")) return;
 
-  $("pickCardWeek").textContent = settings.current_week;
+  $("pickCardWeek").textContent = selectedPickWeek || settings.current_week;
 
   if (pickCountdownTimer) {
     clearInterval(pickCountdownTimer);
     pickCountdownTimer = null;
   }
+
+  const invalidBecauseUsedEarlier = selectedPickIsInvalidBecauseTeamWasUsed();
 
   if (!currentPick) {
     $("currentPickCard").classList.remove("locked");
@@ -1153,15 +1225,22 @@ function renderCurrentPickCard() {
   const lockTime = getPickLockTime(currentPick.game_kickoff);
   const lastChanged = currentPick.updated_at || currentPick.created_at;
 
-  $("currentPickCard").classList.toggle("locked", locked);
-  $("pickCardBadge").textContent = locked ? "Locked" : "Confirmed";
-  $("pickCardBadge").className = `badge ${locked ? "out-b" : "active-b"}`;
+  $("currentPickCard").classList.toggle("locked", locked || invalidBecauseUsedEarlier);
+  $("pickCardBadge").textContent = invalidBecauseUsedEarlier ? "Needs Change" : (locked ? "Locked" : "Confirmed");
+  $("pickCardBadge").className = `badge ${invalidBecauseUsedEarlier || locked ? "out-b" : "active-b"}`;
   $("pickCardTeam").textContent = currentPick.team_name;
-  $("pickCardDetails").textContent = currentPick.auto_assigned
-    ? `Emergency auto-pick assigned because no selection was submitted before the weekly safeguard.`
-    : locked
-      ? `Locked for Week ${settings.current_week}. Good luck!`
-      : `Last changed ${new Date(lastChanged).toLocaleString()}. You may change it before the automatic lock.`;
+
+  const spreadSnapshot = currentPick.spread_at_pick
+    ? ` Spread when selected: ${currentPick.spread_at_pick}.`
+    : "";
+
+  $("pickCardDetails").textContent = invalidBecauseUsedEarlier
+    ? `This team was later used in an earlier completed week. Choose a different Week ${selectedPickWeek} team.${spreadSnapshot}`
+    : currentPick.auto_assigned
+      ? `Emergency auto-pick assigned because no selection was submitted before the weekly safeguard.${spreadSnapshot}`
+      : locked
+        ? `Locked for Week ${selectedPickWeek}. Good luck!${spreadSnapshot}`
+        : `Last changed ${new Date(lastChanged).toLocaleString()}. You may change it before the automatic lock.${spreadSnapshot}`;
 
   const updateCountdown = () => {
     if (!lockTime) {
@@ -1190,11 +1269,11 @@ function renderCurrentPickCard() {
 }
 
 async function syncWeeklyGamesForSafeguard() {
-  if (!me?.is_admin || !games.length) return;
+  if (!me?.is_admin || !games.length || Number(selectedPickWeek) !== Number(settings.current_week)) return;
 
   const scheduleRows = games.map(game => ({
     season: Number(settings.season),
-    week: Number(settings.current_week),
+    week: Number(selectedPickWeek),
     game_id: String(game.id),
     kickoff: game.date,
     home_abbr: game.home.abbr,
@@ -1212,13 +1291,18 @@ async function syncWeeklyGamesForSafeguard() {
   }
 }
 
-async function loadSchedule() {
-  msg("pickStatus", `Loading Week ${settings.current_week} NFL matchups...`);
+async function loadSchedule(week = selectedPickWeek || settings.current_week) {
+  const requestedWeek = Number(week);
+  selectedPickWeek = requestedWeek;
+  scheduleWeekLoaded = requestedWeek;
+  updateSelectedWeekLabels();
+
+  msg("pickStatus", `Loading Week ${requestedWeek} NFL matchups...`);
 
   try {
     const url =
       `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard` +
-      `?seasontype=2&week=${settings.current_week}&dates=${settings.season}`;
+      `?seasontype=2&week=${requestedWeek}&dates=${settings.season}`;
 
     const response = await fetch(url);
     const json = await response.json();
@@ -1254,7 +1338,7 @@ async function loadSchedule() {
 
     await syncWeeklyGamesForSafeguard();
     renderGames();
-    renderWelcomePage();
+    if (Number(requestedWeek) === Number(settings.current_week)) renderWelcomePage();
 
     msg(
       "pickStatus",
@@ -1285,7 +1369,8 @@ function renderGames() {
 }
 
 function teamCard(team, location, home = false, game) {
-  const selected = currentPick?.team_abbr === team.abbr;
+  const invalidCurrentFuturePick = selectedPickIsInvalidBecauseTeamWasUsed();
+  const selected = currentPick?.team_abbr === team.abbr && !invalidCurrentFuturePick;
   const usedInPriorWeek = usedTeams.includes(team.abbr) && !selected;
   const gameLockTime = getPickLockTime(game.date);
   const gameLocked = Date.now() >= gameLockTime.getTime();
@@ -1335,23 +1420,27 @@ window.makePick = async (abbr, name, gameId, gameKickoff) => {
   let confirmation;
   if (currentPick) {
     confirmation =
-      `Change your Week ${settings.current_week} pick?\n\n` +
+      `Change your Week ${selectedPickWeek} pick?\n\n` +
       `Current: ${currentPick.team_name}\n` +
       `New: ${name}`;
   } else {
-    confirmation = `Select ${name} to win Week ${settings.current_week}?`;
+    confirmation = `Select ${name} to win Week ${selectedPickWeek}?`;
   }
 
   if (!confirm(confirmation)) return;
 
   msg("pickStatus", currentPick ? "Changing your pick..." : "Saving your pick...");
 
-  const { data, error } = await sb.rpc("save_or_change_pick", {
-    p_week: settings.current_week,
+  const selectedGame = games.find(game => String(game.id) === String(gameId));
+  const spreadAtPick = selectedGame?.spread || null;
+
+  const { data, error } = await sb.rpc("save_or_change_pick_with_spread", {
+    p_week: Number(selectedPickWeek),
     p_team_abbr: abbr,
     p_team_name: name,
     p_game_id: gameId,
-    p_game_kickoff: gameKickoff
+    p_game_kickoff: gameKickoff,
+    p_spread: spreadAtPick
   });
 
   if (error) {
@@ -1361,7 +1450,7 @@ window.makePick = async (abbr, name, gameId, gameKickoff) => {
   currentPick = data;
   msg(
     "pickStatus",
-    `${name} is now your confirmed Week ${settings.current_week} selection.`
+    `${name} is now your confirmed Week ${selectedPickWeek} selection.`
   );
 
   await loadSharedData();
@@ -1390,6 +1479,8 @@ function setupCommissioner() {
     msg("commissionerMessage", error ? error.message : "Pool settings updated.", Boolean(error));
     if (!error) {
       settings = {...settings, ...updates};
+      selectedPickWeek = Number(settings.current_week);
+      setupPlayerWeekSelector();
       $("seasonDisplay").textContent = settings.season;
       $("currentWeek").textContent = settings.current_week;
       $("commissionerWeek").textContent = settings.current_week;

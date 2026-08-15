@@ -221,6 +221,15 @@
       <section class="panel">
         <div id="identity"></div>
 
+
+        <section class="future-week-selector" style="margin:0 0 16px;padding:14px 16px;border:1px solid #d8dee8;border-radius:12px;background:#f7f9fc;">
+          <label for="playerWeekSelect" style="display:block;font-weight:900;color:#14243b;margin-bottom:7px;letter-spacing:.04em;">
+            SELECT PICK WEEK
+          </label>
+          <select id="playerWeekSelect" style="width:100%;max-width:260px;padding:10px 12px;border:1px solid #aeb8c6;border-radius:9px;background:white;font:inherit;font-weight:800;"></select>
+          <div id="selectedWeekNote" class="small" style="margin-top:7px;color:#667085;"></div>
+        </section>
+
         <section id="currentPickCard" class="current-pick-card">
           <div class="current-pick-heading">
             <span>YOUR WEEK <strong id="pickCardWeek">1</strong> PICK</span>
@@ -233,7 +242,7 @@
           <div id="pickCardCountdown" class="pick-card-countdown"></div>
         </section>
 
-        <h2>Make or Change Your Pick</h2>
+        <h2>Make or Change Your Week <span id="pickPageWeekHeading">1</span> Pick</h2>
         <div id="pickStatus" class="message"></div>
         <div id="games"></div>
       </section>
@@ -395,7 +404,7 @@
   </section>
 </main>
 
-<footer><strong>Season of the Survivors</strong><span>Version 3.5.8.6 Clean Opening</span></footer>
+<footer><strong>Season of the Survivors</strong><span>Version 3.5.9 Future Week Picks</span></footer>
 
 <div id="removePlayerModal" class="remove-player-modal hidden" hidden style="display:none !important;" role="dialog" aria-modal="true" aria-labelledby="removePlayerTitle">
     <div class="remove-player-backdrop"></div>
@@ -461,7 +470,7 @@
 
 
 <script src="config.js"></script>
-<script src="app.js?v=3586"></script>
+<script src="app.js?v=3590"></script>
 
   <div id="creatorCredit" style="text-align:center;color:#9aa3af;font-size:.82rem;padding:10px 12px 18px;letter-spacing:.02em;">
     Season of the Survivors • Created by Wayne Lock
