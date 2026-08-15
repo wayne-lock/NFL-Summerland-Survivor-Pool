@@ -10,32 +10,158 @@
   <link rel="stylesheet" href="styles.css?v=3541">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style id="singleSignInStyle">
-  .launch-hero .stadium-opening-actions .stadium-single-signin{
+<style id="singleSignInCleanDesign">
+  .stadium-opening{
+    position:relative;
+  }
+
+  .stadium-opening-actions{
     position:absolute;
-    left:28.4%;
-    top:76.8%;
-    width:44.4%;
-    height:14.3%;
-    z-index:5;
-    border:2px solid #d9aa3a;
-    border-radius:12px;
-    background:linear-gradient(180deg, rgba(19,39,69,.99), rgba(5,24,49,.99));
-    box-shadow:0 0 16px rgba(224,174,61,.38), inset 0 0 0 1px rgba(255,255,255,.08);
+    inset:0;
+    pointer-events:none;
+  }
+
+  .stadium-opening-actions > *{
+    pointer-events:auto;
+  }
+
+  .single-signin-deck{
+    position:absolute;
+    left:27.6%;
+    top:80.8%;
+    width:48.8%;
+    height:18.2%;
+    z-index:20;
+    box-sizing:border-box;
+    padding:1.2% 1.1% .8%;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    justify-content:center;
+    gap:8%;
+    background:
+      radial-gradient(ellipse at 50% 100%, rgba(33,76,71,.44), transparent 58%),
+      linear-gradient(180deg, rgba(5,18,34,.995), rgba(3,15,29,.995));
+    border-top:1px solid rgba(218,170,61,.38);
+    border-radius:10px;
+    box-shadow:
+      0 -6px 20px rgba(2,9,18,.72),
+      0 8px 22px rgba(0,0,0,.48);
+    overflow:hidden;
+  }
+
+  .single-signin-button{
+    width:100%;
+    min-height:54%;
+    margin:0;
+    padding:0 5%;
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    align-items:center;
+    gap:4%;
+    border:2px solid #d7a62f;
+    border-radius:11px;
+    background:
+      linear-gradient(180deg, rgba(20,53,89,.98), rgba(7,28,55,.99));
+    box-shadow:
+      0 0 12px rgba(225,174,58,.34),
+      inset 0 0 0 1px rgba(255,255,255,.08);
     color:#fff;
     font:inherit;
     cursor:pointer;
     text-transform:uppercase;
   }
-  .launch-hero .stadium-opening-actions .stadium-single-signin span{
+
+  .single-signin-button:active{
+    transform:translateY(1px);
+  }
+
+  .signin-person{
+    width:clamp(25px,3.2vw,44px);
+    height:clamp(25px,3.2vw,44px);
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    color:#f3f5f7;
+    font-size:0;
+    position:relative;
+  }
+
+  .signin-person::before{
+    content:"";
+    position:absolute;
+    top:3%;
+    left:31%;
+    width:38%;
+    height:38%;
+    border-radius:50%;
+    background:#f0f1f2;
+  }
+
+  .signin-person::after{
+    content:"";
+    position:absolute;
+    left:14%;
+    bottom:4%;
+    width:72%;
+    height:43%;
+    border-radius:50% 50% 16% 16%;
+    background:#f0f1f2;
+  }
+
+  .signin-copy{
     display:flex;
-    height:100%;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    font-size:clamp(18px,2.1vw,34px);
-    font-weight:900;
-    letter-spacing:.04em;
-    text-shadow:0 2px 3px rgba(0,0,0,.65);
+    line-height:1;
+    text-align:center;
+  }
+
+  .signin-copy strong{
+    font-size:clamp(20px,2.25vw,35px);
+    letter-spacing:.045em;
+    font-weight:950;
+    text-shadow:0 2px 3px rgba(0,0,0,.64);
+  }
+
+  .signin-copy small{
+    margin-top:4px;
+    font-size:clamp(9px,.95vw,14px);
+    font-weight:650;
+    letter-spacing:.015em;
+    text-transform:none;
+    color:#e8ebef;
+  }
+
+  .signin-arrow{
+    font-size:clamp(30px,3.6vw,52px);
+    line-height:.8;
+    color:#f1ede2;
+    font-weight:300;
+  }
+
+  .single-signin-private{
+    text-align:center;
+    white-space:nowrap;
+    color:#efe4cf;
+    font-size:clamp(9px,1.05vw,15px);
+    font-weight:800;
+    letter-spacing:.12em;
+    text-shadow:0 2px 3px rgba(0,0,0,.8);
+  }
+
+  @media (max-width:700px){
+    .single-signin-deck{
+      left:26.5%;
+      width:51%;
+      top:80.4%;
+      height:18.7%;
+      padding:1.4% 1.2% .8%;
+    }
+    .single-signin-private{
+      letter-spacing:.07em;
+    }
   }
 </style>
 
@@ -67,7 +193,14 @@
       <img class="stadium-opening-art" src="opening-stadium.png?v=352" alt="Season of the Survivors stadium opening page with championship crest and trophy">
       <div class="stadium-opening-actions" aria-label="Pool access options">
         <button type="button" class="stadium-hotspot stadium-join" aria-label="Join the Pool — create a new player account" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('signupTab').click(); document.getElementById('firstName').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});"><span>Join the Pool</span></button>
-        <button type="button" class="stadium-hotspot stadium-single-signin" aria-label="Sign In — player or commissioner" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});"><span>Sign In</span></button>
+        <div class="single-signin-deck" aria-label="Pool sign in">
+          <button type="button" class="single-signin-button" aria-label="Sign In — player or commissioner" onclick="document.querySelector('.auth-forms-shell').classList.remove('hidden'); document.getElementById('loginTab').click(); document.getElementById('loginEmail').focus(); document.querySelector('.auth-forms-shell').scrollIntoView({behavior:'smooth',block:'start'});">
+            <span class="signin-person" aria-hidden="true">●</span>
+            <span class="signin-copy"><strong>SIGN IN</strong><small>Return to Season of the Survivors</small></span>
+            <span class="signin-arrow" aria-hidden="true">›</span>
+          </button>
+          <div class="single-signin-private">★ &nbsp; PRIVATE LEAGUE &nbsp; ★ &nbsp; BY INVITATION &nbsp; ★</div>
+        </div>
       </div>
     </div>
 
@@ -408,7 +541,7 @@
   </section>
 </main>
 
-<footer><strong>Season of the Survivors</strong><span>Version 3.5.8.4 Single Sign In</span></footer>
+<footer><strong>Season of the Survivors</strong><span>Version 3.5.8.5 Clean Single Sign In</span></footer>
 
 <div id="removePlayerModal" class="remove-player-modal hidden" hidden style="display:none !important;" role="dialog" aria-modal="true" aria-labelledby="removePlayerTitle">
     <div class="remove-player-backdrop"></div>
@@ -474,7 +607,7 @@
 
 
 <script src="config.js"></script>
-<script src="app.js?v=3584"></script>
+<script src="app.js?v=3585"></script>
 
   <div id="creatorCredit" style="text-align:center;color:#9aa3af;font-size:.82rem;padding:10px 12px 18px;letter-spacing:.02em;">
     Season of the Survivors • Created by Wayne Lock
