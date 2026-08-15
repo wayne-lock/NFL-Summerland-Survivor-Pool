@@ -1704,7 +1704,7 @@ function renderLockerRoom() {
       <div class="locker-actions">
         <button onclick="togglePaid('${player.id}', ${!player.paid})">${player.paid ? "Mark Unpaid":"Mark Paid"}</button>
         <button class="${player.eliminated ? "":"danger-btn"}" onclick="toggleBench('${player.id}', ${!player.eliminated})">${player.eliminated ? "Return to Game":"Move to Bench"}</button>
-        ${player.id !== me.id ? `<button class="remove-player-btn" onclick="openRemovePlayer('${player.id}')">Remove Player</button>` : ""}
+        ${player.id !== me.id ? `<button type="button" class="remove-player-btn" data-remove-player-id="${player.id}">Remove Player</button>` : ""}
       </div>
     </div>`).join("") : '<p class="small">No survivors have joined yet.</p>';
 }
@@ -1736,16 +1736,28 @@ window.openRemovePlayer = profileId => {
   const modal = $("removePlayerModal");
   if (modal) {
     modal.hidden = false;
+    modal.setAttribute("aria-hidden", "false");
     modal.classList.remove("hidden");
     modal.style.setProperty("display", "grid", "important");
   }
 };
+
+// Delegated handler keeps Remove Player working even though the locker list
+// is re-rendered dynamically after updates.
+document.addEventListener("click", event => {
+  const button = event.target.closest("[data-remove-player-id]");
+  if (!button) return;
+  event.preventDefault();
+  event.stopPropagation();
+  window.openRemovePlayer(button.dataset.removePlayerId);
+});
 
 function closeRemovePlayerModal() {
   pendingRemovePlayerId = null;
   const modal = $("removePlayerModal");
   if (modal) {
     modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
     modal.classList.add("hidden");
     modal.style.setProperty("display", "none", "important");
   }
