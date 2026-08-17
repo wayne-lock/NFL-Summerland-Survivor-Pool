@@ -2759,3 +2759,6 @@ body.history-open {
     justify-self: start;
   }
 }
+.character-choice.selected::after {
+  display: none;
+}
