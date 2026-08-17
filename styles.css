@@ -2775,3 +2775,6 @@ body.history-open {
 .character-choice img {
   object-fit: contain;
 }
+.character-choice img {
+  height: auto;
+}
