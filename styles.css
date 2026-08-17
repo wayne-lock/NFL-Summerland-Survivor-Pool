@@ -2772,3 +2772,6 @@ body.history-open {
 .character-choice[data-avatar="victory-vicki"] strong {
   display: none;
 }
+.character-choice img {
+  object-fit: contain;
+}
