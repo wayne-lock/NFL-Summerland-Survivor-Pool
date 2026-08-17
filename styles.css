@@ -2782,3 +2782,7 @@ body.history-open {
 .character-choice img {
   aspect-ratio: auto;
 }
+.character-choice {
+  padding-bottom: 14px;
+  overflow: visible;
+}
