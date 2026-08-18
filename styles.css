@@ -2768,14 +2768,4 @@ body.history-open {
 .character-choice img {
   object-fit: contain;
 }
-.character-choice img {
-  height: auto;
-}
 
-.character-choice img {
-  aspect-ratio: auto;
-}
-.character-choice {
-  padding-bottom: 14px;
-  overflow: visible;
-}
