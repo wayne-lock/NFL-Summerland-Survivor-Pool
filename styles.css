@@ -2762,16 +2762,9 @@ body.history-open {
 .character-choice.selected::after {
   display: none;
 }
-.character-choice[data-avatar="blitz-bella"] strong,
-.character-choice[data-avatar="captain-kate"] strong,
-.character-choice[data-avatar="end-zone-emma"] strong,
-.character-choice[data-avatar="gridiron-grace"] strong,
-.character-choice[data-avatar="raven-queen"] strong,
-.character-choice[data-avatar="saints-sweetie"] strong,
-.character-choice[data-avatar="touchdown-tina"] strong,
-.character-choice[data-avatar="victory-vicki"] strong {
-  display: none;
-}
+
+
+
 .character-choice img {
   object-fit: contain;
 }
