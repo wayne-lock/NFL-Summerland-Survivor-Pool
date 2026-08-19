@@ -340,9 +340,30 @@ async function boot() {
 
   applyInvitationLink();
 
-  sb.auth.onAuthStateChange((_event, session) => {
-    session ? loadApp(session.user) : showAuth();
-  });
+  sb.auth.onAuthStateChange(async (_event, session) => {
+  if (_event === "PASSWORD_RECOVERY" && session) {
+    const newPassword = window.prompt(
+      "Enter your new password (at least 6 characters):"
+    );
+
+    if (!newPassword) return;
+
+    const { error } = await sb.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) {
+      window.alert("Password was not changed: " + error.message);
+      return;
+    }
+
+    window.alert("Password changed successfully.");
+    await loadApp(session.user);
+    return;
+  }
+
+  session ? loadApp(session.user) : showAuth();
+});
 
   const { data: { session } } = await sb.auth.getSession();
   session ? await loadApp(session.user) : showAuth();
