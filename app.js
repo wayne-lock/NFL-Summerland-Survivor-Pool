@@ -240,6 +240,25 @@ $("loginForm").onsubmit = async event => {
 
   if (error) msg("authMessage", error, true);
 };
+async function forgotPassword() {
+  const email = $("loginEmail").value.trim().toLowerCase();
+
+  if (!email) {
+    msg("authMessage", "Enter your email address first.", true);
+    return;
+  }
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+
+  if (error) {
+    msg("authMessage", error, true);
+    return;
+  }
+
+  msg("authMessage", "Password reset email sent. Check your inbox.");
+}
 
 $("signupForm").onsubmit = async event => {
   event.preventDefault();
