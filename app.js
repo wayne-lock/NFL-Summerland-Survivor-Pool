@@ -68,7 +68,7 @@ function renderAvatarPicker(containerId, selected, onSelect) {
         data-name="${esc(character.name)}"
         aria-label="Select ${esc(character.name)}">
         <img src="${character.id}.svg?v=351" alt="">
-        
+    ${group === "men" ? "<strong>" + esc(character.name) + "</strong>" : ""}    
       </button>
     `).join("");
 
