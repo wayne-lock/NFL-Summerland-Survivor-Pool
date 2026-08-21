@@ -1,0 +1,10 @@
+{
+  "name": "Season of the Survivors",
+  "short_name": "Survivors",
+  "description": "Summerland NFL Survivor Pool",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07131f",
+  "theme_color": "#07131f"
+}
