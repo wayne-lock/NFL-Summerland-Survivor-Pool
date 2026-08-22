@@ -1834,8 +1834,10 @@ function renderInvitations() {
       `You are invited to join the NFL Summerland Survivor Pool.\n\n` +
       `Tap this personalized link:\n${inviteUrl.toString()}\n\n` +
       `Create a password and select Create My Entry.\n\n` +
-      `One Winning Pick. Every Week. Last Survivor Standing.`
-    );
+      `One Winning Pick. Every Week. Last Survivor Standing.`+
+    );`\n\nADD THE POOL TO YOUR HOME SCREEN:\n` +
+      `iPhone/iPad: Open the pool in Safari > Share > Add to Home Screen > Add\n` +
+      `Android: Open the pool in Chrome > Menu > Add to Home screen / Install app > Install\n\n`
     return `<div class="locker-card">
       <div><strong>${esc(invite.first_name)} ${esc(invite.last_name)}</strong><div class="email-link">${esc(invite.email)}</div></div>
       <div><span class="badge ${invite.status==="joined"?"active-b":"danger-b"}">${esc(invite.status)}</span></div>
