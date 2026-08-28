@@ -2768,4 +2768,53 @@ body.history-open {
 .character-choice img {
   object-fit: contain;
 }
+/* Remove Player confirmation modal */
+.remove-player-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
 
+.remove-player-modal.hidden {
+  display: none !important;
+}
+
+.remove-player-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 18, 35, 0.72);
+}
+
+.remove-player-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 92vw);
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+}
+
+.remove-player-warning {
+  font-weight: 800;
+  color: #b42318;
+  margin-bottom: 8px;
+}
+
+.remove-player-consequence {
+  margin: 16px 0;
+  padding: 14px;
+  background: #fff3f2;
+  border-radius: 10px;
+  color: #7a271a;
+}
+
+.remove-player-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
