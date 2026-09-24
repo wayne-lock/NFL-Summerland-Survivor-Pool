@@ -1126,7 +1126,7 @@ async function loadSharedData() {
   const bench = allProfiles.filter(p => p.eliminated);
   const entryFee = Number(settings.entry_fee || 20);
   const prize = allProfiles.filter(p => p.paid).length * entryFee;
-$("#currentWeek").textContent = Number(settings.current_week || 1);
+$("currentWeek").textContent = Number(settings.current_week || 1);
   $("playerCount").textContent = allProfiles.length;
   $("activeCount").textContent = active.length;
   $("benchCount").textContent = bench.length;
