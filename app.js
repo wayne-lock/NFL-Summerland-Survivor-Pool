@@ -432,6 +432,7 @@ function showWelcomePage() {
 
 function showPickPage() {
   setMainView("appView");
+  if ($("#currentWeek")) $("#currentWeek").textContent = String(settings.current_week || 1);
   $("logoutBtn")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
