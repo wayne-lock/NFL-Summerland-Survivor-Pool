@@ -74,7 +74,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .team button{width:100%}
 .identity{display:flex;gap:12px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line)}
 .avatar{width:58px;height:58px;border-radius:50%;background:#e7eef6;display:grid;place-items:center;font-size:30px}
-.survivor-list{display:grid;gap:8px}
+.survivor-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .survivor-row{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:10px}
 .survivor-name{display:flex;align-items:center;gap:9px}
 .mini-avatar{width:38px;height:38px;border-radius:50%;background:#e7eef6;display:grid;place-items:center}
