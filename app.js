@@ -549,7 +549,7 @@ async function loadSurvivorResults() {
     const statusText = player.eliminated
       ? "ON THE BENCH"
       : Number(player.losses || 0) === 2
-        ? "FINAL MULLIGAN"
+      ? "ON LIFE SUPPORT"
         : "STILL IN";
 
     const statusColor = player.eliminated ? "#d71920" : "#16803a";
