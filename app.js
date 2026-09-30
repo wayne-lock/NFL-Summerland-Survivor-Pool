@@ -1195,7 +1195,7 @@ function renderSurvivorList(elementId, players, onBench) {
     const badge = onBench
       ? `<span class="badge out-b">On the Bench</span>`
       : player.losses === 2
-        ? `<span class="badge danger-b">Final Mulligan</span>`
+      ? `<span class="badge danger-b">On Life Support</span>`
         : `<span class="badge active-b">Still in the Game</span>`;
 
     return `
